@@ -1,0 +1,38 @@
+name: Monthly Retrain River Model
+
+on:
+  schedule:
+    - cron: '0 0 28-31 * *'  # Runs on the 28th to 31st to cover last day
+  workflow_dispatch:        # Allow manual trigger hahahahahah
+
+jobs:
+  retrain:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m venv cpfinal
+          source cpfinal/bin/activate
+          pip install -r requirements.txt
+
+      - name: Run retraining script
+        run: |
+          source cpfinal/bin/activate
+          python src/model/train.py
+
+      - name: Commit updated model
+        run: |
+          git config user.name "theboredflamingo"
+          git config user.email "stuthi.shrisha@gmail.com"
+          git add src/model/river_model_endofmay.pkl
+          git commit -m "Auto-retrained model for end of month"
+          git push
