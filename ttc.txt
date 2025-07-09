@@ -1,1 +1,9 @@
 Try to commit
+
+.\venv\Scripts\activate
+python scripts/my_code.py
+deactivate
+
+git add .
+git commit -m "xyz"
+git push origin master
