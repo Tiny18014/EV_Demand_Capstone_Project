@@ -7,3 +7,25 @@ deactivate
 git add .
 git commit -m "xyz"
 git push origin master
+
+CapstoneFinal/
+├── venv/                            # virtual environment (gitignored)
+├── src/
+│   ├── __init__.py
+│   ├── data/
+│   │   ├── scrape.py               # data scraping logic
+│   │   └── preprocess.py           # preprocessing functions
+│   ├── model/
+│   │   ├── train.py                # training pipeline (called monthly)
+│   │   ├── predict.py              # load model & return predictions
+│   │   └── river_model.pkl         # latest model file (overwritten monthly)
+│   └── utils/                      # reusable helpers, logging, etc.
+├── streamlit_app/
+│   └── app.py                      # Streamlit UI
+├── jobs/
+│   └── retrain.sh                  # cron-executed shell script to retrain
+├── .github/workflows/
+│   └── retrain.yml                 # GitHub Actions CI workflow
+├── requirements.txt
+├── .gitignore
+└── README.md
