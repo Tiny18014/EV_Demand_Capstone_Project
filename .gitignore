@@ -1,0 +1,13 @@
+# Ignore full virtual environment
+cpfinal/
+
+# Bytecode and cache
+__pycache__/
+*.py[cod]
+
+# Env vars
+.env
+
+# IDE/editor junk
+.vscode/
+.idea/
