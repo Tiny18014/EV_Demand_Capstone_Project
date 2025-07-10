@@ -6,8 +6,8 @@ from src.data.preprocess import preprocess
 today = datetime.today()
 
 # Set end date as **yesterday** (i.e., last day of the previous month)
-end_date = today - timedelta(days=1)
-start_date = end_date - timedelta(days=30)
+end_date = today
+start_date = end_date - timedelta(days=7)
 
 start_str = start_date.strftime('%Y-%m-%d')
 end_str = end_date.strftime('%Y-%m-%d')
