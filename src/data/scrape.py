@@ -24,6 +24,10 @@ def get_monthly_data(keyword, ticker, start_date, end_date):
     gnews.end_date = (end_dated.year, end_dated.month, end_dated.day)
     articles = gnews.get_news(keyword)
     news_df = pd.DataFrame(articles)
+
+#        news_df['date'] = pd.to_datetime(news_df['date']).dt.date
+#        news_df['date'] = pd.to_datetime(news_df['date'])
+
     if not news_df.empty:
         news_df = news_df[['description', 'published date']]
         news_df.rename(columns={'published date': 'date'}, inplace=True)
@@ -47,4 +51,6 @@ def get_monthly_data(keyword, ticker, start_date, end_date):
     df.sort_values('date', inplace=True)
     df.reset_index(drop=True, inplace=True)
     print(df.info())
+    df = df.dropna()
     return df
+
