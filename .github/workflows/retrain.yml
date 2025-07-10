@@ -26,7 +26,7 @@ jobs:
       - name: Run retraining script
         run: |
           source cpfinal/bin/activate
-          python src/model/train.py
+          python -m src.model.train
 
       - name: Commit updated model
         run: |
