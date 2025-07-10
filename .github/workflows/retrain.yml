@@ -2,7 +2,7 @@ name: Monthly Retrain River Model
 
 on:
   schedule:
-    - cron: '0 0 28-31 * *'  # Runs on the 28th to 31st to cover last day
+    - cron: '0 0 1 * *'  # Runs on the 1st of each month
   workflow_dispatch:        # Allow manual trigger hahahahahah
 
 jobs:
