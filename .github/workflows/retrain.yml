@@ -2,7 +2,7 @@ name: Monthly Retrain River Model
 
 on:
   schedule:
-    - cron: '0 0 10 * *'  # Runs on the 10th of each month for today's test
+    - cron: '0 0 * * 0'  # Runs every week
   workflow_dispatch:        # Allow manual trigger hahahahahah
 jobs:
   retrain:
