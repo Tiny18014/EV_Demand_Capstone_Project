@@ -32,6 +32,6 @@ jobs:
         run: |
           git config user.name "theboredflamingo"
           git config user.email "stuthi.shrisha@gmail.com"
-          git add src/model/river_model_endofmay.pkl
+          git add src/model/rm1.pkl
           git commit -m "Auto-retrained model for end of month"
           git push
