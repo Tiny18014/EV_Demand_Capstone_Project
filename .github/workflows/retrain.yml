@@ -35,3 +35,5 @@ jobs:
           git add src/model/rm1.pkl
           git commit -m "Auto-retrained model for end of month"
           git push
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
