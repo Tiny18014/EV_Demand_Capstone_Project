@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import pickle
 from river import metrics
 from src.data.preprocess import preprocess  
-
+import pandas as pd
 today = datetime.today()
 
 # Set end date as **yesterday** (i.e., last day of the previous month)
@@ -14,8 +14,8 @@ end_str = end_date.strftime('%Y-%m-%d')
 
 # Step 3: Preprocess data using dynamic date strings
 x, y = preprocess(start_str, end_str)
-x.to_csv("data/feat.csv", index=False)
-y.to_csv("data/targ.csv", index=False)
+x.to_csv("src/data/feat.csv", index=False)
+y.to_csv("rc/data/targ.csv", index=False)
 # Step 4: Load existing model
 with open("src/model/rm1.pkl", "rb") as f:
     model = pickle.load(f)
