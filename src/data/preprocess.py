@@ -2,6 +2,8 @@ import pandas as pd
 from huggingface_hub import InferenceClient
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from src.data.scrape import get_monthly_data
+import os
+apii_key = os.getenv("HF_API_KEY")
 def preprocess(s,e):
     r1 = get_monthly_data("Ashok Leyland", "ASHOKLEY.NS", s, e)
     r2 = get_monthly_data("Hero MotoCorp", "HEROMOTOCO.NS", s, e)
@@ -13,7 +15,7 @@ def preprocess(s,e):
     final = final.sort_values(by='date', ascending=True)
     client = InferenceClient(
     provider="hf-inference",
-    api_key="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",
+    api_key=apii_key,
     )
     def extract_sentiment(text):
         if not text or not isinstance(text, str) or text.strip() == "":
