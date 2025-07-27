@@ -37,7 +37,7 @@ jobs:
           git pull --rebase origin master
           git stash pop || true
           git add src/data/feat.csv src/data/targ.csv src/model/rm11.pkl
-          git diff --cached --quiet || git commit -m "Auto-retrained model and new datasets"
+          git commit -m "Auto-retrained model and new datasets"
           git push origin master
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
