@@ -34,8 +34,8 @@ jobs:
           git config user.name "theboredflamingo"
           git config user.email "stuthi.shrisha@gmail.com"
           git pull --rebase origin master
-          git add .
-          git commit -m "Auto-retrained model and new datasets"
-          git push
+          git add src/data/ src/model/
+          git diff --cached --quiet || git commit -m "Auto-retrained model and new datasets"
+          git push origin master
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
