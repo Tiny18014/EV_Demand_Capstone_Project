@@ -36,7 +36,7 @@ jobs:
           git stash --include-untracked
           git pull --rebase origin master
           git stash pop || true
-          git add src/data/feat.csv src/data/targ.csv src/model/rm11.pkl
+          git add src/data/feat.csv src/data/targ.csv src/model/rm1.pkl
           git commit -m "Auto-retrained model and new datasets"
           git push origin master
         env:
