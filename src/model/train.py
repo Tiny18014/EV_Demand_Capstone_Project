@@ -17,7 +17,7 @@ x, y = preprocess(start_str, end_str)
 x.to_csv("src/data/feat.csv", index=False)
 y.to_csv("src/data/targ.csv", index=False)
 # Step 4: Load existing model
-with open("src/model/rm1.pkl", "rb") as f:
+with open("src/model/rm11.pkl", "rb") as f:
     model = pickle.load(f)
 
 # Step 5: Train model incrementally
