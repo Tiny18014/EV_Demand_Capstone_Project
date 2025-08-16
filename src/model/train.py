@@ -34,7 +34,7 @@ for xi, yi in zip(x.to_dict(orient="records"), y):
             metric.update(yi, y_pred)
 
 # Step 7: Save updated model
-with open("src/model/rm1.pkl", "wb") as f:
+with open("src/model/rm11.pkl", "wb") as f:
     pickle.dump(model, f)
 
 # Step 8: Print evaluation result
