@@ -24,3 +24,21 @@ jobs:
           source cpfinal/bin/activate
           pip install -r requirements.txt
 
+      - name: Run retraining script
+        run: |
+          source cpfinal/bin/activate
+          python -m src.model.trainqml
+
+      - name: Commit updated model
+        run: |
+          git config user.name "theboredflamingo"
+          git config user.email "stuthi.shrisha@gmail.com"
+          git stash --include-untracked
+          git pull --rebase origin master
+          git stash pop || true
+          git add src/model/xgboostqml.joblib
+          git commit -m "Updated model retrain with new data"
+          git push origin master
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
