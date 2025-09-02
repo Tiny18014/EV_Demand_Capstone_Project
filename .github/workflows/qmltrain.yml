@@ -27,7 +27,7 @@ jobs:
       - name: Run retraining script
         run: |
           source cpfinal/bin/activate
-          python -m src.model.trainqml
+          python -m src.model.qmltrain
 
       - name: Commit updated model
         run: |
