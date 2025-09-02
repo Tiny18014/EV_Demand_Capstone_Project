@@ -1,4 +1,4 @@
-name: Monthly Retrain River Model
+name: Monthly Retrain Sentiment Model
 
 on:
   schedule:
