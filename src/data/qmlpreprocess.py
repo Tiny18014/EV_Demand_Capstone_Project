@@ -3,14 +3,7 @@ import pandas as pd
 import numpy as np
 import pennylane as qml
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler, StandardScaler
-
-#excel to csv not done yet
-
-#maps
-high_ev_states = ['Delhi', 'Maharashtra', 'Karnataka', 'Tamil Nadu', 'Telangana', 'Gujarat']
-moderate_ev_states = ['Kerala', 'Andhra Pradesh', 'Haryana', 'Rajasthan', 'Punjab', 'West Bengal']
-low_ev_states = ['Uttar Pradesh', 'Bihar', 'Jharkhand', 'Madhya Pradesh', 'Odisha', 'Assam', 'Chhattisgarh',
-                 'Uttarakhand', 'Himachal Pradesh', 'Goa', 'Jammu and Kashmir', 'Tripura', 'Nagaland', 'Meghalaya', 'Others']
+import sys
 
 #functions
 def map_vehicle_category(vehicle: str) -> str:
@@ -38,8 +31,21 @@ def group_state(state):
         return 'Moderate_EV'
     else:
         return 'Low_EV'
+
+
+if __name__ == "__main__":
+    dataset_path = sys.argv[1]
+    df = pd.read_csv(dataset_path)
+    print(f"Loaded dataset: {dataset_path} with shape {df.shape}")
+    #excel to csv not done yet, add it here, and indent everything else
+    
+#maps
+high_ev_states = ['Delhi', 'Maharashtra', 'Karnataka', 'Tamil Nadu', 'Telangana', 'Gujarat']
+moderate_ev_states = ['Kerala', 'Andhra Pradesh', 'Haryana', 'Rajasthan', 'Punjab', 'West Bengal']
+low_ev_states = ['Uttar Pradesh', 'Bihar', 'Jharkhand', 'Madhya Pradesh', 'Odisha', 'Assam', 'Chhattisgarh',
+                 'Uttarakhand', 'Himachal Pradesh', 'Goa', 'Jammu and Kashmir', 'Tripura', 'Nagaland', 'Meghalaya', 'Others']
+
 #code
-df = pd.read_csv("try.csv")
 df['Month'] = df['Month_Name'].map({'jan':1, 'feb':2, 'mar':3, 'apr':4, "may":5, "jun":6, "jul":7,"sep":9, "aug":8, "oct":10, "nov":11 ,'dec':12})
 df['month_sin'] = np.sin(2 * np.pi * df['Month'] / 12)
 df['month_cos'] = np.cos(2 * np.pi * df['Month'] / 12)

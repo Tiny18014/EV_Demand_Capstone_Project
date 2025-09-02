@@ -62,4 +62,4 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 r2 = r2_score(y_test, y_pred)
 print(f"R2 Score: {r2}")
 
-joblib.dump(model3, "src/model/qml_model.joblib")
+joblib.dump(model3, "src/model/xgboostqml.joblib")
