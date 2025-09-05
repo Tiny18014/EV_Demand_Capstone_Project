@@ -100,8 +100,8 @@ if __name__ == "__main__":
     df[['Year', 'Month', 'month_sin', 'month_cos', 'Days_Since_Start']] = scaler.fit_transform(df[['Year', 'Month', 'month_sin', 'month_cos', 'Days_Since_Start']])
     finalcols = ['Vehicle_Class', 'Vehicle_Category','Month', 'month_sin', 'month_cos', 'State_EV_Group', 'Days_Since_Start','Log_EV_Sales_Quantity' ]
     dff = df[finalcols]
-    og = pd.read_csv("src/data/qmldata/ready_dup.csv")
+    og = pd.read_csv("src/data/qmldata/ready.csv")
     og = pd.concat([og, dff], ignore_index=True)
-    og.to_csv("src/data/qmldata/ready_dup.csv")
+    og.to_csv("src/data/qmldata/ready.csv")
 
 
