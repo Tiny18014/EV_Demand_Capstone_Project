@@ -79,8 +79,7 @@ if __name__ == "__main__":
     df['month_sin'] = np.sin(2 * np.pi * df['Month'] / 12)
     df['month_cos'] = np.cos(2 * np.pi * df['Month'] / 12)
     df["Date"] = pd.to_datetime(
-        "01-" + df["Month"].astype(str) + "-" + df["Year"].astype(str),
-        format="%d-%m-%Y"
+        dict(year=df["Year"], month=df["Month"], day=1)
     )
     categorical_cols = ['Vehicle_Class', 'Vehicle_Category']
     for col in categorical_cols:
