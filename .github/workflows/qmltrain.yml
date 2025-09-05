@@ -30,7 +30,9 @@ jobs:
           echo "CHANGED_FILE=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^src/data/qmldata/')" >> $GITHUB_ENV
 
       - name: Run preprocessing
-        run: python -m src.data.qmlpreprocess $CHANGED_FILE
+        run: |
+          source cpfinal/bin/activate
+          python -m src.data.qmlpreprocess $CHANGED_FILE
 
       - name: Run retraining script
         run: |
