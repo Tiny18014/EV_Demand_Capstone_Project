@@ -78,6 +78,10 @@ if __name__ == "__main__":
                                         'JAN':1, 'FEB':2, 'MAR':3, 'APR':4, "MAY":5, "JUN":6, "JUL":7,"SEP":9, "AUG":8, "OCT":10, "NOV":11 ,'DEC':12})
     df['month_sin'] = np.sin(2 * np.pi * df['Month'] / 12)
     df['month_cos'] = np.cos(2 * np.pi * df['Month'] / 12)
+    df["Date"] = pd.to_datetime(
+        "01-" + df["Month"].astype(str) + "-" + df["Year"].astype(str),
+        format="%d-%m-%Y"
+    )
     categorical_cols = ['Vehicle_Class', 'Vehicle_Category']
     for col in categorical_cols:
         e = LabelEncoder()
@@ -90,9 +94,9 @@ if __name__ == "__main__":
                       'Vehicle_Category','month_sin', 'month_cos']
 
     X = scaler.fit_transform(df[features_to_use])
-    df['Date'] = pd.to_datetime(df['Date'])
+    #df['Date'] = pd.to_datetime(df['Date'])
     df['Log_EV_Sales_Quantity'] = np.log1p(df['EV_Sales_Quantity'])
-    df['Days_Since_Start'] = (df['Date'] - df['Date'].min()).dt.days
+    df["Days_Since_Start"] = (df["Date"] - pd.to_datetime("2014-01-01")).dt.days
     scaler = StandardScaler()
     df[['Year', 'Month', 'month_sin', 'month_cos', 'Days_Since_Start']] = scaler.fit_transform(df[['Year', 'Month', 'month_sin', 'month_cos', 'Days_Since_Start']])
     finalcols = ['Vehicle_Class', 'Vehicle_Category','Month', 'month_sin', 'month_cos', 'State_EV_Group', 'Days_Since_Start','Log_EV_Sales_Quantity' ]
