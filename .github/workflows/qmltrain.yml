@@ -27,7 +27,8 @@ jobs:
       - name: Find changed dataset
         id: changed
         run: |
-          echo "CHANGED_FILE=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^src/data/qmldata/')" >> $GITHUB_ENV
+          LATEST_FILE=$(git log -1 --pretty= --name-only -- src/data/qmldata/ | head -n 1)
+          echo "CHANGED_FILE=$LATEST_FILE" >> $GITHUB_ENV
 
       - name: Run preprocessing
         run: |
