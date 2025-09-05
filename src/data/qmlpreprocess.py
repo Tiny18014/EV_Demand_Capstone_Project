@@ -52,11 +52,10 @@ if __name__ == "__main__":
     # Melt from wide to long format
     df_long = df.melt(
         id_vars=["S_No", "Vehicle_Class"],
-        var_name="Month",
+        var_name="Month_Name",
         value_name="EV_Sales_Quantity"
     )
 
-    # Clean thousands separators and convert to numeric
     df_long["EV_Sales_Quantity"] = (
         df_long["EV_Sales_Quantity"]
         .astype(str)
@@ -69,13 +68,14 @@ if __name__ == "__main__":
     df_long["State"] = "Karnataka"
 
     # Reorder final columns
-    df_final = df_long[["Month", "Year", "State", "EV_Sales_Quantity", "Vehicle_Class"]]
+    df_final = df_long[["Month_Name", "Year", "State", "EV_Sales_Quantity", "Vehicle_Class"]]
     df_final["Vehicle_Category"] = df_final["Vehicle_Class"].apply(map_vehicle_category)
     df = df_final
 
 
     #code
-    df['Month'] = df['Month_Name'].map({'jan':1, 'feb':2, 'mar':3, 'apr':4, "may":5, "jun":6, "jul":7,"sep":9, "aug":8, "oct":10, "nov":11 ,'dec':12})
+    df['Month'] = df['Month_Name'].map({'jan':1, 'feb':2, 'mar':3, 'apr':4, "may":5, "jun":6, "jul":7,"sep":9, "aug":8, "oct":10, "nov":11 ,'dec':12,
+                                        'JAN':1, 'FEB':2, 'MAR':3, 'APR':4, "MAY":5, "JUN":6, "JUL":7,"SEP":9, "AUG":8, "OCT":10, "NOV":11 ,'DEC':12})
     df['month_sin'] = np.sin(2 * np.pi * df['Month'] / 12)
     df['month_cos'] = np.cos(2 * np.pi * df['Month'] / 12)
     categorical_cols = ['Vehicle_Class', 'Vehicle_Category']
