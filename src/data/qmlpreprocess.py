@@ -65,7 +65,7 @@ if __name__ == "__main__":
 
     # Add context columns
     df_long["Year"] = 2025
-    df_long["State"] = "Karnataka"
+    df_long["State"] = "Haryana"
 
     # Reorder final columns
     df_final = df_long[["Month_Name", "Year", "State", "EV_Sales_Quantity", "Vehicle_Class"]]
