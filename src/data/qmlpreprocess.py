@@ -3,6 +3,7 @@ import numpy as np
 import pennylane as qml
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler, StandardScaler
 import sys
+import regex as re
 
 
 #maps
@@ -64,8 +65,18 @@ if __name__ == "__main__":
     )
 
     # Add context columns
-    df_long["Year"] = 2025
-    df_long["State"] = "Haryana"
+
+    first_cell = df_long.columns[0]
+    match = re.search(r"Data  of ([A-Za-z\s]+)\s*\((\d{4})\)", first_cell)
+    if match:
+        state_name = match.group(1).strip()
+        year = int(match.group(2))
+    else:
+        state_name, year = None, None
+
+    print(state_name, year) 
+    df_long["Year"] = year
+    df_long["State"] = state_name
 
     # Reorder final columns
     df_final = df_long[["Month_Name", "Year", "State", "EV_Sales_Quantity", "Vehicle_Class"]]
