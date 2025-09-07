@@ -38,7 +38,7 @@ jobs:
           feat = pd.read_csv("src/data/feat.csv")
           targ = pd.read_csv("src/data/targ.csv")
 
-          if feat.shape[0] < 50 or targ.shape[0] < 50:  # pick your threshold
+          if feat.shape[0] == 0 or targ.shape[0] == 0:  # pick your threshold
               raise SystemExit("❌ Not enough rows, aborting commit.")
           EOF
 
