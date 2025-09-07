@@ -29,7 +29,20 @@ jobs:
           source cpfinal/bin/activate
           python -m src.model.train
 
+      - name: Validate datasets
+        run: |
+          python - <<'EOF'
+          import pandas as pd
+
+          feat = pd.read_csv("src/data/feat.csv")
+          targ = pd.read_csv("src/data/targ.csv")
+
+          if feat.shape[0] < 50 or targ.shape[0] < 50:  # pick your threshold
+              raise SystemExit("❌ Not enough rows, aborting commit.")
+          EOF
+
       - name: Commit updated model
+        if: success()
         run: |
           git config user.name "theboredflamingo"
           git config user.email "stuthi.shrisha@gmail.com"
