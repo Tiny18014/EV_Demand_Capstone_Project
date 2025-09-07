@@ -31,6 +31,7 @@ jobs:
 
       - name: Validate datasets
         run: |
+          source cpfinal/bin/activate
           python - <<'EOF'
           import pandas as pd
 
