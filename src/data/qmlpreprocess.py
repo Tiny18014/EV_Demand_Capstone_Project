@@ -44,6 +44,16 @@ if __name__ == "__main__":
     dataset_path = sys.argv[1]
     df = pd.read_csv(dataset_path, encoding="cp1252", skiprows=2)
     print(f"Loaded dataset: {dataset_path} with shape {df.shape}")
+    
+    first_cell = df.columns[0]
+    match = re.search(r"Data  of ([A-Za-z\s]+)\s*\((\d{4})\)", first_cell)
+    if match:
+        state_name = match.group(1).strip()
+        year = int(match.group(2))
+    else:
+        state_name, year = None, None
+
+    print(state_name, year) 
     #excel to csv not done yet, add it here, and indent everything else
     df = df.rename(columns={
         df.columns[0]: "S_No",
@@ -65,16 +75,6 @@ if __name__ == "__main__":
     )
 
     # Add context columns
-
-    first_cell = df_long.columns[0]
-    match = re.search(r"Data  of ([A-Za-z\s]+)\s*\((\d{4})\)", first_cell)
-    if match:
-        state_name = match.group(1).strip()
-        year = int(match.group(2))
-    else:
-        state_name, year = None, None
-
-    print(state_name, year) 
     df_long["Year"] = year
     df_long["State"] = state_name
 
