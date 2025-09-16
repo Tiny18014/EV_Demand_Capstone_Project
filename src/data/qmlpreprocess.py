@@ -47,6 +47,7 @@ if __name__ == "__main__":
     
     first_cell = df.columns[0]
     match = re.search(r"Data  of ([A-Za-z\s]+)\s*\((\d{4})\)", first_cell)
+    print(match)
     if match:
         state_name = match.group(1).strip()
         year = int(match.group(2))
