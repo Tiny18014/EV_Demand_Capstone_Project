@@ -1,6 +1,6 @@
 import xgboost as xgb
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error, r2_score, mean_squared_log_error
+from sklearn.metrics import mean_squared_error, r2_score
 import pennylane as qml
 import numpy as np
 import pandas as pd
@@ -55,8 +55,6 @@ print(f"Mean Squared Error (XGBoost with Quantum Embeddings): {mse}")
 rmse = np.sqrt(mse)
 print(f"Root Mean Squared Error (RMSE): {rmse}")
 
-rmsle = np.sqrt(mean_squared_log_error(y_test, y_pred))
-print(f"RMSLE: {rmsle}")
 
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 r2 = r2_score(y_test, y_pred)
