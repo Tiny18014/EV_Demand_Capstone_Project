@@ -42,7 +42,7 @@ def group_state(state):
 
 if __name__ == "__main__":
     dataset_path = sys.argv[1]
-    df = pd.read_csv(dataset_path, encoding="cp1252", skiprows=2)
+    df = pd.read_csv(dataset_path, encoding="cp1252")
     print(f"Loaded dataset: {dataset_path} with shape {df.shape}")
     
     first_cell = df.columns[0]
@@ -56,6 +56,7 @@ if __name__ == "__main__":
 
     print(state_name, year) 
     #excel to csv not done yet, add it here, and indent everything else
+    df = pd.read_csv(dataset_path, encoding="cp1252", skiprows=2)
     df = df.rename(columns={
         df.columns[0]: "S_No",
         df.columns[1]: "Vehicle_Class"
