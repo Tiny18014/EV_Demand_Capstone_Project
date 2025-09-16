@@ -83,8 +83,9 @@ if __name__ == "__main__":
     # Reorder final columns
     df_final = df_long[["Month_Name", "Year", "State", "EV_Sales_Quantity", "Vehicle_Class"]]
     df_final["Vehicle_Category"] = df_final["Vehicle_Class"].apply(map_vehicle_category)
+    n_vehicle_classes = df_final["Vehicle_Class"].nunique()
+    df_final = df_final.iloc[:-n_vehicle_classes, :]   # drop the last N rows
     df = df_final
-
 
     #code
     df['Month'] = df['Month_Name'].map({'jan':1, 'feb':2, 'mar':3, 'apr':4, "may":5, "jun":6, "jul":7,"sep":9, "aug":8, "oct":10, "nov":11 ,'dec':12,
