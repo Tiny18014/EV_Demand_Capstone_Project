@@ -47,7 +47,7 @@ jobs:
           git stash --include-untracked
           git pull --rebase origin master
           git stash pop || true
-          git add src/model/xgboostqml.joblib src/data/qmldata /ready.csv
+          git add src/model/xgboostqml.joblib src/data/qmldata/ready.csv
           git commit -m "Updated model retrain with new data"
           git push origin master
         env:
