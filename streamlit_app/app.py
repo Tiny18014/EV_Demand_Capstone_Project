@@ -97,8 +97,6 @@ if 'input_type' in st.session_state:
 
 #disclaimer and footer
 st.markdown(" ")
-st.markdown("<h2 align=center> #SayNoToHate<h2>", unsafe_allow_html=True)
-st.markdown(" ")
 st.markdown(
     """
     <div style="background-color: #00bfa6;
@@ -116,4 +114,4 @@ st.markdown(
 st.markdown(" ")
 st.markdown(" ")
 st.markdown(" ")
-st.markdown("<p style='text-align: center; color: #ffffff;'>© 2024 HateShield. All rights reserved.</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #ffffff;'>© 2025 EVAnalysis. All rights reserved.</p>", unsafe_allow_html=True)
