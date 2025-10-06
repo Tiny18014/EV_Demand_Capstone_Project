@@ -4,7 +4,6 @@ from river import metrics
 from src.data.preprocess import preprocess  
 import pandas as pd
 import streamlit as st
-from streamlit_option_menu import option_menu
 import plotly.express as px
 from src.model.agent_sentiment import tech_to_business_agent
 
