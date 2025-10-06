@@ -29,3 +29,55 @@ CapstoneFinal/
 ├── requirements.txt
 ├── .gitignore
 └── README.md
+
+
+
+Cognition – for sentiment analysis and forecasting (implies intelligent interpretation and machine understanding).
+
+Projections – for sales forecasting (a formal, data-oriented term for forward estimates).
+
+dynamics – for energy usage and charging pattern analysis (sounds technical and structured, evoking analytical visualization).
+
+Synopsis – for about the project (concise, professional, and suitably high-level).
+
+
+Cognition
+
+Projections
+
+Dynamics
+
+Synopsis
+
+- how do i get info from the model outputs and graphs?! with agents of course!!! you are going to use agents to comprehend the information and then give it in business terms to the user. you don't have to know demand forecasting. you will teach it to the agent, and it'll understand for you.
+
+
+
+colormaps:
+
+Use	Hex	Description - Graphs
+Data 1	#00FFC6	Bright mint-cyan — stands out on dark backgrounds, “electric energy” feel.
+Data 2	#0077B6	Cool electric blue, technical and futuristic.
+Data 3	#48CAE4	Softer aqua tone, great for secondary or related metrics.
+Data 4	#90E0EF	Pale ice-blue, excellent for subtle contrasts or filled areas.
+Data 5	#FFD166	Warm amber-yellow, for highlights or forecast trends.
+Data 6	#06D6A0	Lively green-cyan, evokes sustainability and “clean energy.”
+Data 7	#EF476F	Bold fuchsia-red, to emphasize anomalies, warnings, or peak points.
+
+Primary Colors
+Role	Color	Description
+Primary	#00BFA6	A refined teal-cyan tone — energetic, modern, evokes electric charge and technology. - Use for agent boxes borders
+Secondary	#0D1B2A	Deep navy-charcoal base — gives a sense of depth, professionalism, and focus.
+Accent	#F5CB5C	Muted electric amber — adds vibrancy and warmth without losing formality.
+
+Other
+| Purpose                         | Hex Code  | Description                                                              | Notes                                                                                   |
+| ------------------------------- | --------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| **Primary Text**                | #E0E6ED | Light bluish-gray                                                        | Crisp and legible on dark backgrounds — elegant without the harshness of pure white.    |
+| **Secondary Text**              | #9BAEC1 | Muted steel-gray                                                      | For labels, captions, or less prominent text — keeps hierarchy clear.                   |
+| **Disabled / Muted Text**       | #5C708A | Cool desaturated slate - box colors                                                  | Indicates deactivated or background info.                                               |
+| **Text on Buttons (`#F5CB5C`)** | #0D1B2A | Your background color — text color used in boxes |                                                                                         |
+| **Link / Highlight Text**       | #00BFA6 | Electric teal                                                            | Adds a modern, energetic accent — great for hover states or data emphasis.              |
+| **Alert / Warning Text**        | #EF476F | Bright fuchsia-red                                                       | For error, anomaly, or alert states — clean contrast against both background and amber. |
+
+
