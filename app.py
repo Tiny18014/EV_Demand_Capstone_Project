@@ -55,7 +55,7 @@ st.markdown(f"""
     """, unsafe_allow_html=True)
 st.write("")
 
-st.markdown("<p style='text-align: center;'>This hate speech detection application helps make online spaces safer by identifying and mitigating harmful content in text, audio, and video. This application aims to promote a healthier, more respectful online environment.</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center;'>This app powers into the EV future — predicting sales, gauging public buzz, and decoding how drivers charge up and use their rides. It’s your data-driven dashboard for spotting the next big spark in electric mobility.</p>", unsafe_allow_html=True)
 st.write("")
 st.write("")
 
@@ -296,10 +296,10 @@ if 'input_type' in st.session_state:
         st.header('Charging Behavior and Energy Consumption Analysis')
           
     elif st.session_state.input_type == "about":
-        st.header('What is hate speech?')
-        st.markdown("Hate speech is communication that attacks a person or group on the basis of attributes such as race, religion, ethnic origin, national origin, disability, or gender identity. It can use offensive language, promote violence, or spread negative stereotypes. Hate speech can be online or offline, and is spread across various media.")
+        st.header('Why electric vehicles?')
+        st.markdown("to be filled")
         st.header('About')
-        st.markdown('This machine learning application incorporates the Hate Speech Dataset from Kaggle, and has the primary functionality of classifying <b>text, audio</b> and <b>video</b> as hate speech, offensive language, and non offensive language. This project is primarily a <b>Natural Language Processing</b> application, aimed at extracting the context from various media to further classify as hate speech. <b>Extended Gradient Boosting</b> model is used for the final predictions and <b>Term Frequency - Inverse Document Frequency</b> vectorizer is used to vectorize and convert the words to numerical values. The libraries used for audio and video conversion are <b>pydub</b> and <b>moviepy</b> respectively. Audio is first transcribed into text, and then predicted. Video is converted to audio and then transcribed to text. This project is developed using <b>Streamlit</b>.', unsafe_allow_html=True)
+        st.markdown('to be filled', unsafe_allow_html=True)
 
 
 #disclaimer and footer
