@@ -7,7 +7,7 @@ import streamlit as st
 import plotly.express as px
 from src.model.agent_sentiment import tech_to_business_agent
 
-st.set_page_config(page_title='EV', page_icon='🗣️', layout="wide")
+st.set_page_config(page_title='Capstone2025', page_icon='🏎️', layout="wide")
 
 st.markdown("""
     <style>
