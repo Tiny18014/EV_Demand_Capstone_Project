@@ -145,11 +145,10 @@ if 'input_type' in st.session_state:
         #Actual Streamlit Code
         st.header('Sentiment Analysis and Forecasting')
         st.markdown(
-    "<p style='color: #9BAEC1;'>How did the sentiment vary over the past week? How's it going to change for the next week? We've got the analysis.</p>", 
+    "<p style='color: #9BAEC1;'>How did the sentiment vary so far? How's it going to change for the next week? We've got the analysis.</p>", 
     unsafe_allow_html=True
 )
 
-        cols_pred = st.columns(5)
         from river import metrics  # Overall class-wise performance
         accuracy = metrics.Accuracy()
         f1 = metrics.F1()
@@ -162,63 +161,47 @@ if 'input_type' in st.session_state:
             precision.update(yi, y_pred)
             recall.update(yi, y_pred)
 
+        cols = st.columns(5)
         for i, brand_id in enumerate(range(5)):
-            x_brand = df1[df1['brand_encoded'] == brand_id]
+                x_brand = df1[df1['brand_encoded'] == brand_id]
+                asl = df[df["brand_name"] == "Ashok Leyland"]["vader_compound"]
+                hsl = df[df["brand_name"] == "Hero MotoCorp"]["vader_compound"]
+                msl = df[df["brand_name"] == "Mahindra"]["vader_compound"]
+                tsl = df[df["brand_name"] == "Tata Motors"]["vader_compound"]
+                tvsl = df[df["brand_name"] == "TVS Motors"]["vader_compound"]
+                if brand_id == 0:
+                    name = "Ashok Leyland"
+                    data = asl
+                elif brand_id == 1:
+                    name = "Hero MotoCorp"
+                    data = hsl
+                elif brand_id == 2:
+                    name = "Mahindra"
+                    data = msl
+                elif brand_id == 3:
+                    name = "Tata Motors"
+                    data = tsl
+                else:
+                    name = "TVS Motors"
+                    data = tvsl
+                last_xi = x_brand.iloc[-1].to_dict()
+                y_pred = model.predict_one(last_xi)
 
-            if x_brand.empty or len(x_brand) < 2:
-                with cols_pred[i]:
-                    st.warning(f"⚠️ No data for **{brands[brand_id]}**.")
-                continue
+                prev_xi = x_brand.iloc[-2].to_dict()
+                y_prev = model.predict_one(prev_xi)
 
-            # Latest and previous prediction
-            last_xi = x_brand.iloc[-1].to_dict()
-            y_pred = model.predict_one(last_xi)
+                if y_pred == 1.0:
+                    arrow = "↗"
+                    sentiment_text = "Positive"
+                else:
+                    arrow = "↘"
+                    sentiment_text = "Negative"
 
-            prev_xi = x_brand.iloc[-2].to_dict()
-            y_prev = model.predict_one(prev_xi)
+                deltaa = data.iloc[-1]-data.iloc[-2]
 
-            # Determine base and hover colors, arrow, and sentiment
-            if y_pred == 1.0:
-                base_bg = "rgba(168, 230, 207, 0.25)"
-                hover_bg = "rgba(168, 230, 207, 0.5)"
-                base_text = "#9BAEC1"
-                hover_text = "#112235"
-                arrow = "↗"
-                arrow_color = "#124628"
-                sentiment_text = "Positive sentiment predicted next week"
-            else:
-                base_bg = "rgba(255, 99, 99, 0.25)"
-                hover_bg = "rgba(255, 99, 99, 0.5)"
-                base_text = "#9BAEC1"
-                hover_text = "#112235"
-                arrow = "↘"
-                arrow_color = "#681313"
-                sentiment_text = "Negative sentiment predicted next week"
-
-            # Add CSS for hover effect
-            st.markdown(f"""
-                <style>
-                .hover-box-{i} {{
-                    background: {hover_bg};
-                    backdrop-filter: blur(10px);
-                    -webkit-backdrop-filter: blur(10px);
-                    border-radius: 15px;
-                    padding:15px;
-                    text-align: center;
-                    color: {hover_text};
-                    transition: background 0.3s ease, color 0.3s ease;
-                }}
-                </style>
-            """, unsafe_allow_html=True)
-
-            # Render box with diagonal arrow
-            with cols_pred[i]:
-                st.markdown(f"""
-                    <div class="hover-box-{i}">
-                        <h5 style='color: inherit; text-align: center;'>{brands[brand_id]}</h5>
-                        <h1 style='font-size: 100px; color:{arrow_color};'>{arrow}</h1>
-                    </div>
-                """, unsafe_allow_html=True)
+                with cols[i]:
+                        st.markdown(f"#### {name}")
+                        st.metric("Forecasted vs Over the Week", arrow, delta=deltaa, chart_data=data, chart_type="line")
 
         #graphs from plotly
         custom_colors = ['#00FFC6', '#0077B6',"#48CAE4", '#90E0EF', '#FFD166']
@@ -250,7 +233,6 @@ if 'input_type' in st.session_state:
         
         c1_graph, c2_graph = st.columns(2)
         with c1_graph:
-
             st.subheader("Sentiment Momentum Comparison")
             st.plotly_chart(fig_momentum, use_container_width=True)
             st.markdown(
@@ -270,10 +252,11 @@ if 'input_type' in st.session_state:
         c1,c2 = st.columns([2,1])
         with c1:
             st.subheader("Brand-Level Analysis")
+            st.markdown("<p style='color: #9BAEC1;'>Our agent combines model results with sentiment trends for clear business insights.</p>", unsafe_allow_html=True)
             progress = st.progress(0)
             insights = []
 
-            """for i, (_, row) in enumerate(brand_summary.iterrows()):
+        """     for i, (_, row) in enumerate(brand_summary.iterrows()):
                 result = tech_to_business_agent.run(str(row.to_dict()))
                 insights.append(result.content)
                 progress.progress((i + 1) / len(brand_summary))
@@ -310,8 +293,9 @@ st.markdown(
             color: #000000; border: 1px solid #00bfa6; padding: 10px; border-radius: 20px;">
         <h6 style='text-align: center;'>Disclaimer</h6>
         <p style='text-align: center;'>
-            This application is designed to detect and analyze instances of hate speech in text, audio, and video. 
-            During its operation, offensive language may be displayed, thus user discretion is advised.
+            This application is designed to analyse and forecast trends in the electric vehicle (EV) market using historical data and machine learning models.
+            The predictions and insights provided are based on the data available up to the current date and may not account for unforeseen market changes, technological advancements, or regulatory shifts.
+
         </p>
     </div>
     """,
