@@ -295,8 +295,8 @@ st.markdown(
         <p style='text-align: center;'>
             This application is designed to analyse and forecast trends in the electric vehicle (EV) market using historical data and machine learning models.
             The predictions and insights provided are based on the data available up to the current date and may not account for unforeseen market changes, technological advancements, or regulatory shifts.
-
-        </p>
+</p>
+        
     </div>
     """,
     unsafe_allow_html=True
