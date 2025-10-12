@@ -278,16 +278,6 @@ if 'input_type' in st.session_state:
         st.header('Charging Behavior and Energy Consumption Analysis')
           
     elif st.session_state.input_type == "about":
-        st.markdown("""
-            <style>
-                .styled-container {
-                    background: #5c708a;
-                    padding: 25px;
-                    border-radius: 0px;
-                    color: #0d1b2a;
-                }
-            </style>
-        """, unsafe_allow_html=True)
         news_container = st.container(border=True)
          # Fetch and display news summary
         with news_container:
@@ -296,7 +286,7 @@ if 'input_type' in st.session_state:
             news_summary = fetch_news_data()
             half = len(news_summary) // 2
             with col_left:
-                st.header('Weekly EV News Synopsis')
+                st.header('On the Headlines')
                 st.markdown(news_summary[:half])
             with col_right:
                 st.markdown(news_summary[half:])

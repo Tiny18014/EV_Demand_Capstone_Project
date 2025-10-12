@@ -35,7 +35,7 @@ def fetch_news_data():
                 "role": "user",
                 "content": f"You want users to stay up to date with news about eletric vehicles in India."
                            f"While your primary context for news articles is {data}, understand it well. DO NOT USE TABLES."
-                           f"Your context is time bound between {start_str} and {end_str}. So give it as a weekly news update in clear, easy to understand language. Make it short and brief, and engaging in your delivery."
+                           f"Your context is time bound between {start_str} and {end_str}. So give it as a weekly news update in clear, easy to understand language. KEEP IT SHORT, BRIEF AND ENGATING."
             }
         ],
     )
