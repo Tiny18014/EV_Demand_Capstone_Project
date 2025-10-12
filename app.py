@@ -286,8 +286,8 @@ if 'input_type' in st.session_state:
             st.markdown('to be filled', unsafe_allow_html=True)
         with cols[1]:
             st.header('Weekly EV News Synopsis')
-            from src.news import fetch_news_data, start_date, end_date
-            news_summary = fetch_news_data(start_date, end_date)
+            from src.news import fetch_news_data
+            news_summary = fetch_news_data()
             st.markdown(news_summary)
 
 
