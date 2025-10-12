@@ -9,9 +9,8 @@ def fetch_news_data():
     today = datetime.today()
     end_date = today
     start_date = end_date - timedelta(days=7)
-    apii_key = os.environ.get("TAVILY_API_KEY_1")
     news_api = os.environ.get("NEWS_API_KEY_1")
-    client = TavilyClient(apii_key)
+    client = TavilyClient("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")
     start_str = start_date.strftime('%Y-%m-%d')
     end_str = end_date.strftime('%Y-%m-%d')
     response = client.search(
