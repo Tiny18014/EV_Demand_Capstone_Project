@@ -2,7 +2,7 @@ from tavily import TavilyClient
 from huggingface_hub import InferenceClient
 from datetime import datetime, timedelta
 import os
-
+#importing from env and not githubsecrets
 def fetch_news_data():
     today = datetime.today()
     end_date = today
