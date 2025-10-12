@@ -3,7 +3,7 @@ from huggingface_hub import InferenceClient
 from datetime import datetime, timedelta
 import os
 
-def fetch_news_data(start_date, end_date):
+def fetch_news_data():
     today = datetime.today()
     end_date = today
     start_date = end_date - timedelta(days=7)
