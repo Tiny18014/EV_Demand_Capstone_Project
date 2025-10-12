@@ -278,17 +278,37 @@ if 'input_type' in st.session_state:
         st.header('Charging Behavior and Energy Consumption Analysis')
           
     elif st.session_state.input_type == "about":
-        cols = st.columns([2,1])
-        with cols[0]:
-            st.header('Why electric vehicles?')
-            st.markdown("to be filled")
-            st.header('About')
-            st.markdown('to be filled', unsafe_allow_html=True)
-        with cols[1]:
-            st.header('Weekly EV News Synopsis')
+        st.markdown("""
+            <style>
+                .styled-container {
+                    background: #5c708a;
+                    padding: 25px;
+                    border-radius: 0px;
+                    color: #0d1b2a;
+                }
+            </style>
+        """, unsafe_allow_html=True)
+        news_container = st.container(border=True)
+         # Fetch and display news summary
+        with news_container:
+            col_left, col_right = st.columns(2)
             from src.model.news import fetch_news_data
             news_summary = fetch_news_data()
-            st.markdown(news_summary)
+            half = len(news_summary) // 2
+            with col_left:
+                st.header('Weekly EV News Synopsis')
+                st.markdown(news_summary[:half])
+            with col_right:
+                st.markdown(news_summary[half:])
+
+        col_why, col_about = st.columns([2,1]) 
+        with col_why:
+            st.header('Why electric vehicles?')
+            st.markdown("to be filled")
+        with col_about:
+            st.header('About the App')
+            st.markdown("to be filled")
+
 
 
 #disclaimer and footer
