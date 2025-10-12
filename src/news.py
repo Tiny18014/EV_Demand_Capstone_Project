@@ -2,11 +2,10 @@ from tavily import TavilyClient
 from huggingface_hub import InferenceClient
 import os
 
-apii_key = os.getenv("TAVILY_API_KEY")
-news_api = os.getenv("NEWS_API_KEY")
-client = TavilyClient(apii_key)
-
 def fetch_news_data(start_date, end_date):
+    apii_key = os.getenv("TAVILY_API_KEY")
+    news_api = os.getenv("NEWS_API_KEY")
+    client = TavilyClient(apii_key)
     start_str = start_date.strftime('%Y-%m-%d')
     end_str = end_date.strftime('%Y-%m-%d')
     response = client.search(
