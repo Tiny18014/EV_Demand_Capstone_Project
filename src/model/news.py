@@ -33,8 +33,8 @@ def fetch_news_data():
         messages=[
             {
                 "role": "user",
-                "content": f"You want users to stay up to date with news about eletric vehicles in India. "
-                           f"While your primary context for news articles is {data}, understand it well enough to highlight both the positive and negative aspects in the news if any"
+                "content": f"You want users to stay up to date with news about eletric vehicles in India."
+                           f"While your primary context for news articles is {data}, understand it well"
                            f"Your context is time bound between {start_str} and {end_str}. So give it as a weekly news update in clear, easy to understand language. Make it short and brief, and engaging in your delivery."
             }
         ],
