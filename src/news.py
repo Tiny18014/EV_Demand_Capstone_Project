@@ -1,5 +1,6 @@
 from tavily import TavilyClient
 from huggingface_hub import InferenceClient
+from src.model.train import start_date, end_date
 import os
 
 def fetch_news_data(start_date, end_date):
