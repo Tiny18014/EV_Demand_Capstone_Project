@@ -1,0 +1,40 @@
+from tavily import TavilyClient
+from huggingface_hub import InferenceClient
+import os
+
+apii_key = os.getenv("TAVILY_API_KEY")
+news_api = os.getenv("NEWS_API_KEY")
+client = TavilyClient(apii_key)
+
+def fetch_news_data(start_date, end_date):
+    start_str = start_date.strftime('%Y-%m-%d')
+    end_str = end_date.strftime('%Y-%m-%d')
+    response = client.search(
+        query="give me the recent news of electric vehicles from india",
+        include_answer="basic",
+        max_results=10,
+        start_date=start_str,
+        end_date=end_str,
+        country="india",
+        include_domains=["https://timesofindia.indiatimes.com/","https://www.deccanherald.com/","https://indianexpress.com/","https://www.thehindu.com/"]
+    )
+    data = " ".join(item['content'] for item in response['results'] if 'content' in item)
+    client = InferenceClient(
+    provider="novita",
+    api_key=news_api,
+    )
+
+    completion = client.chat.completions.create(
+        model="openai/gpt-oss-20b",
+        messages=[
+            {
+                "role": "user",
+                "content": f"You want users to stay up to date with news about eletric vehicles in India. "
+                           f"While your primary context for news articles is {data}, understand it well enough to highlight both the positive and negative aspects in the news if any"
+                           f"Your context is time bound between {start_str} and {end_str}. So give it as a weekly news update in clear, easy to understand language. Don't make it too short, but be brief, and engaging in your delivery."
+            }
+        ],
+    )
+
+    answer = completion.choices[0].message["content"]
+    return answer
