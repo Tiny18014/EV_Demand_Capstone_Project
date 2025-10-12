@@ -271,7 +271,6 @@ if 'input_type' in st.session_state:
             st.metric(label="Precision", value=f"{precision.get():.2f}")
             st.metric(label="Recall", value=f"{recall.get():.2f}")
 
-
     elif st.session_state.input_type == "demand":
         st.header('Sales Forecasting')
 
@@ -279,10 +278,17 @@ if 'input_type' in st.session_state:
         st.header('Charging Behavior and Energy Consumption Analysis')
           
     elif st.session_state.input_type == "about":
-        st.header('Why electric vehicles?')
-        st.markdown("to be filled")
-        st.header('About')
-        st.markdown('to be filled', unsafe_allow_html=True)
+        cols = st.columns([2,1])
+        with cols[0]:
+            st.header('Why electric vehicles?')
+            st.markdown("to be filled")
+            st.header('About')
+            st.markdown('to be filled', unsafe_allow_html=True)
+        with cols[1]:
+            st.header('Weekly EV News Synopsis')
+            from src.news import fetch_news_data, start_date, end_date
+            news_summary = fetch_news_data(start_date, end_date)
+            st.markdown(news_summary)
 
 
 #disclaimer and footer
