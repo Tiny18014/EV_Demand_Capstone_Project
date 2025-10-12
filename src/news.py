@@ -2,6 +2,8 @@ from tavily import TavilyClient
 from huggingface_hub import InferenceClient
 from datetime import datetime, timedelta
 import os
+from dotenv import load_dotenv
+load_dotenv()
 #importing from env and not githubsecrets
 def fetch_news_data():
     today = datetime.today()
