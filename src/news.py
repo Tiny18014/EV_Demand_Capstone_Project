@@ -1,9 +1,12 @@
 from tavily import TavilyClient
 from huggingface_hub import InferenceClient
-from src.model.train import start_date, end_date
+from datetime import datetime, timedelta
 import os
 
 def fetch_news_data(start_date, end_date):
+    today = datetime.today()
+    end_date = today
+    start_date = end_date - timedelta(days=7)
     apii_key = os.getenv("TAVILY_API_KEY")
     news_api = os.getenv("NEWS_API_KEY")
     client = TavilyClient(apii_key)
