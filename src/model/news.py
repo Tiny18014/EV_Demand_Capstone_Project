@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
 load_dotenv()
-#importing from env and not githubsecrets
+#importing from env and not githubsecrets s
 def fetch_news_data():
     today = datetime.today()
     end_date = today
