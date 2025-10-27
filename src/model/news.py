@@ -11,7 +11,7 @@ def fetch_news_data():
     start_date = end_date - timedelta(days=7)
     start_str = start_date.strftime('%Y-%m-%d')
     end_str = end_date.strftime('%Y-%m-%d')
-    news_api = "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"
+    news_api = "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"
     client = TavilyClient("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")
     response = client.search(
         query="give me the recent news of electric vehicles from india",
