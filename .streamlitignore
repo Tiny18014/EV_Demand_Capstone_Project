@@ -1,0 +1,12 @@
+# Virtual environments
+.cpfinal/
+cpfinal/
+
+# Cache and compiled files
+src/__pycache__/
+src/data/__pycache__/
+src/model/__pycache__/
+*.pyc
+*.pyo
+*.log
+
