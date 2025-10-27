@@ -294,10 +294,16 @@ if 'input_type' in st.session_state:
         col_why, col_about = st.columns([2,1]) 
         with col_why:
             st.header('Why electric vehicles?')
-            st.markdown("to be filled")
+            st.markdown("In 2025, the world stands at the crossroads of innovation and sustainability, and electric vehicles are at the heart of this transformation. Our project explores the evolving landscape of EV technology—where clean energy, intelligent systems, and advanced engineering converge to redefine mobility. By focusing on electric vehicles, we aim to contribute to a future that is not only more efficient and connected but also environmentally responsible, aligning technological progress with global sustainability goals.")
         with col_about:
             st.header('About the App')
-            st.markdown("to be filled")
+            st.markdown("This application is developed as part of our Capstone project, and has the following functionalities: ")
+            st.markdown("""
+            - **Sentiment Analysis and Forecasting**: Analyze public sentiment towards various EV brands using social media and news data. Forecast future sentiment trends to help brands understand market perception.
+            - **Sales Forecasting**: Predict future sales of electric vehicles based on historical sales data, market trends, and external factors.
+            - **Charging Behavior and Energy Consumption Analysis**: Examine how EV users charge their vehicles and their energy consumption patterns to optimize charging infrastructure and energy management.
+            """)    
+            st.caption("Developed by Team 8 | Capstone 2025")
 
 
 
