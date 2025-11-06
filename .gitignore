@@ -13,5 +13,5 @@ __pycache__/
 .idea/
 
 ttc.txt
-
+#streamlit details
 .streamlit/secrets.toml
