@@ -6,6 +6,7 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 from src.model.agent_sentiment import tech_to_business_agent
+from src.model.agent_charging import charging_intelligence_agent
 
 st.set_page_config(page_title='Capstone2025', page_icon='🏎️', layout="wide")
 
@@ -276,7 +277,24 @@ if 'input_type' in st.session_state:
 
     elif st.session_state.input_type == "charge":
         st.header('Charging Behavior and Energy Consumption Analysis')
-          
+        st.markdown("Space for stock prices")
+        charge_container = st.container(border=True) 
+        """        with charge_container:
+            col_left, col_right = st.columns(2)
+            month_name = datetime.now().strftime("%B")
+            year = datetime.now().strftime("%Y")
+            output = charging_intelligence_agent.run(f"Generate the EV Charging Infrastructure Intelligence Report for India for {month_name}, {year}")
+            import re
+            x = re.sub(r"<think>.*?</think>", "", output.content, flags=re.DOTALL).strip()
+            x = re.sub(r"<tools>.*?</tools>", "", x, flags=re.DOTALL).strip()
+            x = re.sub(r"<references>.*?</references>", "", x, flags=re.DOTALL).strip()
+            half = len(x) // 2
+            with col_left: 
+                st.markdown(x[:half], unsafe_allow_html=False)
+            with col_right:
+                st.markdown(x[half:], unsafe_allow_html=False)"""
+
+        
     elif st.session_state.input_type == "about":
         news_container = st.container(border=True)
          # Fetch and display news summary
@@ -299,11 +317,11 @@ if 'input_type' in st.session_state:
             st.header('About the App')
             st.markdown("This application is developed as part of our Capstone project, and has the following functionalities: ")
             st.markdown("""
-            - **Sentiment Analysis and Forecasting**: Analyze public sentiment towards various EV brands using social media and news data. Forecast future sentiment trends to help brands understand market perception.
+            - **Sentiment Analysis and Forecasting**: Analyze public sentiment towards various EV brands and forecast future sentiment trends to help brands understand market perception.
             - **Sales Forecasting**: Predict future sales of electric vehicles based on historical sales data, market trends, and external factors.
             - **Charging Behavior and Energy Consumption Analysis**: Examine how EV users charge their vehicles and their energy consumption patterns to optimize charging infrastructure and energy management.
             """)    
-            st.caption("Developed by Team 8 | Capstone 2025")
+            st.caption("Developed by Atharva, Shubham and Stuthi | Capstone 2025")
 
 
 

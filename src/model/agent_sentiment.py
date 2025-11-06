@@ -4,8 +4,9 @@ from textwrap import dedent
 from agno.agent import Agent
 from agno.models.huggingface import HuggingFace
 import os
+import streamlit as st
 
-openaii = os.getenv("HF_AGENT_API_KEY")
+openaii = st.secrets["SENTIMENT_AGENT"]
 # --- Agent Definition ---
 tech_to_business_agent = Agent(
     model=HuggingFace(id="openai/gpt-oss-20b", api_key=openaii, temperature=0.25),

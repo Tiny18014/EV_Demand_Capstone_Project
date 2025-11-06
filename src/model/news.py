@@ -1,7 +1,7 @@
 from tavily import TavilyClient
 from huggingface_hub import InferenceClient
 from datetime import datetime, timedelta
-import os
+import streamlit as st
 from dotenv import load_dotenv
 load_dotenv()
 #importing from env and not githubsecrets s
@@ -11,8 +11,9 @@ def fetch_news_data():
     start_date = end_date - timedelta(days=7)
     start_str = start_date.strftime('%Y-%m-%d')
     end_str = end_date.strftime('%Y-%m-%d')
-    news_api = "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"
-    client = TavilyClient("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")
+    news_api = st.secrets["NEWS_API_KEY"]
+    tav_key = st.secrets["TAVILY_API_KEY"]
+    client = TavilyClient(tav_key)
     response = client.search(
         query="give me the recent news of electric vehicles from india",
         include_answer="basic",
