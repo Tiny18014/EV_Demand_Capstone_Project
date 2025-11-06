@@ -257,14 +257,14 @@ if 'input_type' in st.session_state:
             progress = st.progress(0)
             insights = []
 
-        """     for i, (_, row) in enumerate(brand_summary.iterrows()):
+            for i, (_, row) in enumerate(brand_summary.iterrows()):
                 result = tech_to_business_agent.run(str(row.to_dict()))
                 insights.append(result.content)
                 progress.progress((i + 1) / len(brand_summary))
             st.success("Analysis complete ✅")
             for insight in insights:
                 with st.expander(insight.split('\n')[0].strip('#').strip(), expanded=False):
-                    st.markdown(insight, unsafe_allow_html=False)"""
+                    st.markdown(insight, unsafe_allow_html=False)
         with c2:
             st.subheader("Model Metrics")
             st.metric(label="Accuracy", value=f"{accuracy.get():.2%}")
@@ -279,7 +279,7 @@ if 'input_type' in st.session_state:
         st.header('Charging Behavior and Energy Consumption Analysis')
         st.markdown("Space for stock prices")
         charge_container = st.container(border=True) 
-        """        with charge_container:
+        with charge_container:
             col_left, col_right = st.columns(2)
             month_name = datetime.now().strftime("%B")
             year = datetime.now().strftime("%Y")
@@ -292,7 +292,7 @@ if 'input_type' in st.session_state:
             with col_left: 
                 st.markdown(x[:half], unsafe_allow_html=False)
             with col_right:
-                st.markdown(x[half:], unsafe_allow_html=False)"""
+                st.markdown(x[half:], unsafe_allow_html=False)
 
         
     elif st.session_state.input_type == "about":
