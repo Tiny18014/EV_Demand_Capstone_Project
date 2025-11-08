@@ -73,7 +73,7 @@ if __name__ == "__main__":
         df_long["EV_Sales_Quantity"]
         .astype(str)
         .str.replace(",", "", regex=False)
-        .astype(int)
+        .astype(float)
     )
 
     # Add context columns
