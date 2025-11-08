@@ -73,10 +73,7 @@ if __name__ == "__main__":
         df_long["EV_Sales_Quantity"]
         .astype(str)
         .str.replace(",", "", regex=False)
-        .replace(["", " ", "nan", "NaN"], 0)  # optional cleanup
-        .astype(float)                         # first to float
-        .fillna(0)                             # replace NaN with 0
-        .astype(int)                           # finally to int
+        .astype(int)                         # finally to int
     )
 
     # Add context columns
@@ -85,6 +82,7 @@ if __name__ == "__main__":
 
     # Reorder final columns
     df_final = df_long[["Month_Name", "Year", "State", "EV_Sales_Quantity", "Vehicle_Class"]]
+
     df_final["Vehicle_Category"] = df_final["Vehicle_Class"].apply(map_vehicle_category)
     n_vehicle_classes = df_final["Vehicle_Class"].nunique()
     df_final = df_final.iloc[:-n_vehicle_classes, :]   # drop the last N rows
