@@ -70,11 +70,17 @@ if __name__ == "__main__":
     )
 
     df_long["EV_Sales_Quantity"] = (
-        df_long["EV_Sales_Quantity"]
-        .astype(str)
-        .str.replace(",", "", regex=False)
-        .astype(int)                         # finally to int
+        pd.to_numeric(
+            df_long["EV_Sales_Quantity"]
+            .astype(str)
+            .str.replace(",", "", regex=False),
+            errors="coerce"
+        )
+        .fillna(0)
+        .astype(int)
     )
+    if not np.issubdtype(df_long["EV_Sales_Quantity"].dtype, np.number):
+        raise ValueError("EV_Sales_Quantity column contains non-numeric entries.")
 
     # Add context columns
     df_long["Year"] = year
