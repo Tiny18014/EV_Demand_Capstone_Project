@@ -13,24 +13,27 @@ low_ev_states = ['Uttar Pradesh', 'Bihar', 'Jharkhand', 'Madhya Pradesh', 'Odish
                  'Uttarakhand', 'Himachal Pradesh', 'Goa', 'Jammu and Kashmir', 'Tripura', 'Nagaland', 'Meghalaya', 'Others']
 
 #functions
-def map_vehicle_category(vehicle: str) -> str:
-  v = vehicle.upper()
-  # 2-WHEELERS
-  if any(x in v for x in ["M-CYCLE", "MOTOR CYCLE", "MOTORISED CYCLE", "SCOOTER", "MOPED"]):
-    return "2-wheelers"
-  # 3-WHEELERS
-  if "THREE WHEELER" in v or "E-RICKSHAW" in v or "QUADRICYCLE" in v:
-    return "3-wheelers"
-  # 4-WHEELERS (cars, cabs, vans, personal service vehicles)
-  if any(x in v for x in ["MOTOR CAR", "MOTOR CAB", "MAXI CAB", "LUXURY CAB", "CASH VAN",
-  "PRIVATE SERVICE VEHICLE", "OMNI BUS (PRIVATE USE)",
-  "MOTOR CARAVAN", "CAMPER VAN", "HEARSES"]):
-    return "4-wheelers"
-  # BUS
-  if "BUS" in v:
-    return "bus"
-  # EVERYTHING ELSE
-  return "other"
+def map_vehicle_category(vehicle) -> str:
+    if pd.isna(vehicle):
+        return "unknown"
+    v = str(vehicle).upper()
+    # 2-WHEELERS
+    if any(x in v for x in ["M-CYCLE", "MOTOR CYCLE", "MOTORISED CYCLE", "SCOOTER", "MOPED"]):
+        return "2-wheelers"
+    # 3-WHEELERS
+    if "THREE WHEELER" in v or "E-RICKSHAW" in v or "QUADRICYCLE" in v:
+        return "3-wheelers"
+    # 4-WHEELERS
+    if any(x in v for x in ["MOTOR CAR", "MOTOR CAB", "MAXI CAB", "LUXURY CAB", "CASH VAN",
+                            "PRIVATE SERVICE VEHICLE", "OMNI BUS (PRIVATE USE)",
+                            "MOTOR CARAVAN", "CAMPER VAN", "HEARSES"]):
+        return "4-wheelers"
+    # BUS
+    if "BUS" in v:
+        return "bus"
+    # EVERYTHING ELSE
+    return "other"
+
 def group_state(state):
     if state in high_ev_states:
         return 'High_EV'
