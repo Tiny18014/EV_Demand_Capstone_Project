@@ -4,6 +4,7 @@ import pennylane as qml
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler, StandardScaler
 import sys
 import regex as re
+import joblib
 
 
 #maps
@@ -111,9 +112,9 @@ if __name__ == "__main__":
         e = LabelEncoder()
         df[col] = e.fit_transform(df[col])
     df['State_EV_Group'] = df['State'].apply(group_state)
-    group_le = LabelEncoder()
+    group_le = joblib.load("src/model/statele.joblib")
     df['State_EV_Group'] = group_le.fit_transform(df['State_EV_Group'])
-    scaler = MinMaxScaler(feature_range=(-1, 1))
+    scaler = joblib.load("src/model/minmaxscaler.joblib")
     features_to_use = ['Vehicle_Class', 'State_EV_Group', 'Year',
                       'Vehicle_Category','month_sin', 'month_cos']
 
@@ -122,15 +123,13 @@ if __name__ == "__main__":
     df['Log_EV_Sales_Quantity'] = np.log1p(df['EV_Sales_Quantity'])
     df["Days_Since_Start"] = (df["Date"] - pd.to_datetime("2014-01-01")).dt.days
     print(df["Days_Since_Start"])
-    sscaler = StandardScaler()
+    sscaler = joblib.load("src/model/standardscaler.joblib")
     df[['Year', 'Month', 'month_sin', 'month_cos', 'Days_Since_Start']] = sscaler.fit_transform(df[['Year', 'Month', 'month_sin', 'month_cos', 'Days_Since_Start']])
     finalcols = ['Vehicle_Class', 'Vehicle_Category','Month', 'month_sin', 'month_cos', 'State_EV_Group', 'Days_Since_Start','Log_EV_Sales_Quantity' ]
     dff = df[finalcols]
     og = pd.read_csv("src/data/qmldata/ready.csv")
     og = pd.concat([og, dff], ignore_index=True, axis=0)
     og.to_csv("src/data/qmldata/ready.csv")
-    import joblib
-    joblib.dump(scaler, "src/model/minmaxscaler.joblib")
-    joblib.dump(sscaler, "src/model/stdscaler.joblib")
+
 
 
