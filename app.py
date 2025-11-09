@@ -10,6 +10,10 @@ from src.model.agent_sentiment import tech_to_business_agent
 from src.model.agent_charging import charging_intelligence_agent
 from src.data.stockcharge import get_ev_demand_analysis
 
+from statsmodels.tsa.statespace.sarimax import SARIMAX
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.linear_model import LinearRegression
+
 st.set_page_config(page_title='Capstone2025', page_icon='🏎️', layout="wide")
 
 st.markdown("""
@@ -282,6 +286,425 @@ if 'input_type' in st.session_state:
         st.header('Charging Behavior and Energy Consumption Analysis')
         
 
+
+        # ==================== LOAD DATA ====================
+        reg_path = "src/data/final_monthwise_registrations.csv"
+        stations_path = "src/data/state_wise_stations.xlsx"
+        start_year = 2018
+
+        @st.cache_data
+        def load_ev_registrations(csv_path, start_year=2018):
+            df = pd.read_csv(csv_path, header=0, dtype=str)
+            df = df.loc[:, df.notna().any(axis=0)]
+            month_col = df.columns[0]
+            df.rename(columns={month_col: "MonthRaw"}, inplace=True)
+            df["MonthRaw"] = df["MonthRaw"].str.strip().str.upper()
+            for c in df.columns:
+                if c == "MonthRaw":
+                    continue
+                df[c] = pd.to_numeric(df[c].str.replace(",", "").replace("", np.nan), errors="coerce").fillna(0).astype(int)
+            months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"]
+            def month_idx(i, raw):
+                r = str(raw).upper()
+                for m in months:
+                    if r.startswith(m):
+                        return months.index(m) + 1
+                return (i % 12) + 1
+            m_list, y_list = [], []
+            import re
+            for i, raw in enumerate(df["MonthRaw"]):
+                m = month_idx(i, raw)
+                year = start_year + (i // 12)
+                found = re.search(r"(\d{4})", str(raw))
+                if found:
+                    year = int(found.group(1))
+                m_list.append(m)
+                y_list.append(year)
+            df["Month"], df["Year"] = m_list, y_list
+            df["date"] = pd.to_datetime(df["Year"].astype(str) + "-" + df["Month"].astype(str) + "-01")
+            value_cols = [c for c in df.columns if c not in ["MonthRaw","Month","Year","date"]]
+            df_long = df.melt(id_vars=["MonthRaw","Month","Year","date"], value_vars=value_cols,
+                            var_name="State", value_name="Registrations")
+            df_long["Registrations"] = pd.to_numeric(df_long["Registrations"], errors="coerce").fillna(0).astype(int)
+            return df_long
+
+        df_long = load_ev_registrations(reg_path)
+
+        # National monthly
+        national = df_long.groupby("date", as_index=False)["Registrations"].sum()
+        series = national.set_index("date").asfreq("MS")["Registrations"].fillna(0)
+
+        # ==================== 2️⃣ HYBRID SARIMAX (GDP EXOG) ====================
+        st.subheader("📊 Hybrid SARIMAX Forecast — Monthly Training, Quarterly Output (with GDP Growth)")
+
+        # --- Step 1: Monthly EV series ---
+        ev_monthly = series.asfreq("MS").fillna(method="ffill").fillna(0)
+
+        # --- Step 2: GDP growth (quarterly → monthly upsample) ---
+        gdp_values = [
+            7.5, 6.5, 6.2, 5.7, 5.1, 4.3, 3.3, 2.9,
+            -23.1, -5.8, 1.8, 3.3, 22.6, 9.9, 5.5, 4.5,
+            13.5, 6.0, 4.8, 6.9, 9.7, 9.3, 9.5, 8.4,
+            6.5, 5.6, 6.4, 6.7, 7.4, 7.8
+        ]
+        gdp_index = pd.date_range(start="2018-03-31", periods=len(gdp_values), freq="QE")
+        gdp_quarterly = pd.DataFrame({"GDP_Growth": gdp_values}, index=gdp_index)
+        gdp_monthly = gdp_quarterly.resample("MS").ffill()
+        gdp_monthly = gdp_monthly.reindex(ev_monthly.index).ffill().bfill()
+
+        # --- Step 3: Train/test split ---
+        train_end = "2024-12-01"
+        y_train = ev_monthly.loc[:train_end]
+        y_test = ev_monthly.loc["2025-01-01":]
+        exog_train = gdp_monthly.loc[:train_end]
+        exog_test = gdp_monthly.loc["2025-01-01":]
+
+        # --- Step 4: Fit SARIMAX model ---
+        model_x = SARIMAX(
+            y_train, exog=exog_train,
+            order=(1, 1, 1), seasonal_order=(1, 1, 1, 12),
+            enforce_stationarity=False, enforce_invertibility=False
+        )
+        res_x = model_x.fit(disp=False)
+
+        # --- Step 5: Forecast (test) ---
+        forecast_x = res_x.get_forecast(steps=len(y_test), exog=exog_test)
+        forecast_mean_x = forecast_x.predicted_mean
+        forecast_ci_x = forecast_x.conf_int()
+
+        # --- Step 6: Evaluation ---
+        mae_m = mean_absolute_error(y_test, forecast_mean_x)
+        rmse_m = np.sqrt(mean_squared_error(y_test, forecast_mean_x))
+        r2_m = r2_score(y_test, forecast_mean_x)
+
+        # Aggregate to quarterly
+        ev_quarterly = ev_monthly.resample("QE").sum()
+        forecast_quarterly_test = forecast_mean_x.resample("QE").sum()
+        actual_quarterly_test = y_test.resample("QE").sum()
+
+        mae_q = mean_absolute_error(actual_quarterly_test, forecast_quarterly_test)
+        rmse_q = np.sqrt(mean_squared_error(actual_quarterly_test, forecast_quarterly_test))
+        r2_q = r2_score(actual_quarterly_test, forecast_quarterly_test)
+
+        st.write("**Monthly Performance (Test period)**")
+        st.write(f"• MAE = {mae_m:,.2f} • RMSE = {rmse_m:,.2f} • R² = {r2_m:.3f}")
+        st.write("**Quarterly Performance (Aggregated)**")
+        st.write(f"• MAE = {mae_q:,.2f} • RMSE = {rmse_q:,.2f} • R² = {r2_q:.3f}")
+
+        # --- Step 7: Future forecast (24 months) ---
+        future_months = 36  # Changed from 24 to 36 to ensure we get full 2025-2027
+        future_index = pd.date_range(start=ev_monthly.index[-1] + pd.offsets.MonthBegin(1),
+                                    periods=future_months, freq="MS")
+
+     
+        future_exog = pd.DataFrame({"GDP_Growth": gdp_monthly["GDP_Growth"].iloc[-1]}, index=future_index)
+        future_pred = res_x.get_forecast(steps=future_months, exog=future_exog)
+        future_mean = future_pred.predicted_mean
+        future_ci = future_pred.conf_int()
+
+        # Aggregate to quarterly for downstream energy section
+        ev_forecast = future_mean.resample("QE").sum()
+
+      
+        # --- Step 8: Plot ---
+        fig_sarimax = go.Figure()
+        fig_sarimax.add_trace(go.Scatter(x=ev_monthly.index, y=ev_monthly, mode="lines", name="Observed"))
+        fig_sarimax.add_trace(go.Scatter(x=forecast_mean_x.index, y=forecast_mean_x, mode="lines", name="Forecast (Test)", line=dict(color="orange")))
+        fig_sarimax.add_trace(go.Scatter(x=future_mean.index, y=future_mean, mode="lines", name="Future Forecast", line=dict(color="green")))
+        fig_sarimax.add_trace(go.Scatter(x=future_ci.index, y=future_ci.iloc[:, 0], fill=None, mode="lines", line_color="green", showlegend=False))
+        fig_sarimax.add_trace(go.Scatter(x=future_ci.index, y=future_ci.iloc[:, 1], fill='tonexty', mode="lines", line_color="green", opacity=0.2, name="Confidence Interval"))
+        fig_sarimax.update_layout(
+            title="Hybrid SARIMAX Forecast — Monthly Training, Quarterly Output (GDP as Exogenous)",
+            xaxis_title="Date", yaxis_title="EV Registrations",
+            paper_bgcolor="#112235", plot_bgcolor="#112235", font=dict(color="#9BAEC1")
+        )
+        st.plotly_chart(fig_sarimax, use_container_width=True)
+
+        # ==================== 3️⃣ ENERGY FORECAST ====================
+        st.subheader("🔋 Energy Consumption Prediction (2025–2027)")
+
+        category_share = {'TWO WHEELER': 0.57, 'THREE WHEELER': 0.33, 'FOUR WHEELER': 0.10}
+        ev_data = {
+            'TWO WHEELER': {'Daily_km': 25, 'Range_km': 141, 'Battery_kWh': 2.98},
+            'THREE WHEELER': {'Daily_km': 60, 'Range_km': 129, 'Battery_kWh': 3.7},
+            'FOUR WHEELER': {'Daily_km': 40, 'Range_km': 312, 'Battery_kWh': 30.2}
+        }
+        vehicle_lifetime_years = 10
+        charging_efficiency = 0.9
+
+        # Compute energy forecast
+        all_quarters = pd.concat([ev_quarterly, ev_forecast])
+        fleet_df = pd.DataFrame(index=all_quarters.index)
+        for cat, share in category_share.items():
+            fleet_df[f'{cat}_New'] = all_quarters * share
+
+        for cat in category_share.keys():
+            new_v = fleet_df[f'{cat}_New'].values
+            active = np.zeros(len(all_quarters))
+            for i in range(len(all_quarters)):
+                for j in range(i + 1):
+                    age_yrs = (i - j) / 4
+                    if age_yrs <= vehicle_lifetime_years:
+                        survival = 1 - (age_yrs / vehicle_lifetime_years)
+                        active[i] += new_v[j] * survival
+            fleet_df[f'{cat}_Active'] = active
+
+        days_in_quarter = pd.Series(all_quarters.index).diff().dt.days.fillna(91).values
+        for cat in category_share.keys():
+            dE = ev_data[cat]['Battery_kWh'] * ev_data[cat]['Daily_km'] / ev_data[cat]['Range_km']
+            fleet_df[f'{cat}_Energy_MWh'] = (fleet_df[f'{cat}_Active'] * dE * days_in_quarter / 1000 / charging_efficiency)
+
+        fleet_df["TotalEnergy_MWh"] = fleet_df[[f'{cat}_Energy_MWh' for cat in category_share]].sum(axis=1)
+        future_energy = fleet_df.loc[fleet_df.index > ev_quarterly.index[-1]]
+
+        fig_energy = px.line(
+            future_energy[[f'{cat}_Energy_MWh' for cat in category_share]].reset_index().melt(id_vars='index', var_name='Category', value_name='Energy_MWh'),
+            x='index', y='Energy_MWh', color='Category',
+            title="Forecasted EV Energy Demand by Category (MWh, Quarterly)", markers=True
+        )
+        fig_energy.update_layout(paper_bgcolor="#112235", plot_bgcolor="#112235", font=dict(color="#9BAEC1"))
+        
+        # Side-by-side layout for energy chart and formula
+        c1_energy, c2_energy = st.columns([2, 1])
+        with c1_energy:
+            st.plotly_chart(fig_energy, use_container_width=True)
+            st.markdown(
+                "<h6 style='text-align: center; color: #F5CB5C;'>Energy demand forecast broken down by vehicle category.</h6>", 
+                unsafe_allow_html=True
+            )
+        
+        with c2_energy:
+            st.latex(r"""
+            E_{\text{quarter}} = 
+            \frac{N_{\text{active}} \times D_{\text{daily}} \times B_{\text{kWh}} \times \text{Days}_{\text{quarter}}}
+            {R_{\text{km}} \times 1000 \times \eta}
+            """)
+            
+            st.markdown("""
+            <div style="
+                background-color:#0f1b33;
+                border: 1px solid #2e4057;
+                border-radius: 10px;
+                padding: 15px;
+                color:#B8C6DB;
+                font-size:14px;
+                line-height:1.8;">
+            <b>Where:</b><br>
+            • <b>E<sub>quarter</sub></b> — Energy demand in <b>MWh</b><br>
+            • <b>N<sub>active</sub></b> — Active EV fleet<br>
+            • <b>D<sub>daily</sub></b> — Avg daily distance (km)<br>
+            • <b>B<sub>kWh</sub></b> — Battery capacity (kWh)<br>
+            • <b>R<sub>km</sub></b> — Vehicle range (km)<br>
+            • <b>η</b> — Charging efficiency (<b>0.9</b>)
+            </div>
+            """, unsafe_allow_html=True)
+
+        # ==================== 4️⃣ INFRASTRUCTURE WITH PREDICTIONS ====================
+        st.subheader("🏗️ Charging Infrastructure — Top 5 States with Predictions")
+        stations_df = pd.read_excel(stations_path)
+        stations_df.columns = stations_df.columns.astype(str).str.strip()
+        top5 = stations_df.sort_values(by="2024", ascending=False).head(5)
+
+        # Linear regression predictions for each state
+        prediction_years = [2025, 2026, 2027]
+        top5_predictions = []
+
+        for _, row in top5.iterrows():
+            state = row['State']
+            X = np.array([2022, 2023, 2024]).reshape(-1, 1)
+            y = np.array([row['2022'], row['2023'], row['2024']])
+            
+            lr = LinearRegression()
+            lr.fit(X, y)
+            
+            predictions = lr.predict(np.array(prediction_years).reshape(-1, 1))
+            
+            for year, pred in zip(prediction_years, predictions):
+                top5_predictions.append({
+                    'State': state,
+                    'Year': str(year),
+                    'Stations': max(0, int(pred))
+                })
+
+        # Combine historical and predictions
+        top5_long = top5.melt(id_vars="State", value_vars=["2022","2023","2024"], 
+                            var_name="Year", value_name="Stations")
+        predictions_df = pd.DataFrame(top5_predictions)
+        predictions_df['Type'] = 'Predicted'
+        top5_long['Type'] = 'Actual'
+
+        combined_df = pd.concat([top5_long, predictions_df], ignore_index=True)
+
+        fig_st = px.bar(
+            combined_df,
+            x="State", y="Stations", color="Year", 
+            pattern_shape="Type",
+            barmode="group",
+            title="Top 5 States — Charging Stations (Actual & Predicted)"
+        )
+        fig_st.update_layout(paper_bgcolor="#112235", plot_bgcolor="#112235", font=dict(color="#9BAEC1"))
+
+        # ==================== 5️⃣ NATIONAL INFRASTRUCTURE PREDICTIONS ====================
+        # Calculate national totals
+        national_stations = stations_df[['2022', '2023', '2024']].sum()
+        X_national = np.array([2022, 2023, 2024]).reshape(-1, 1)
+        y_national = national_stations.values
+
+        lr_national = LinearRegression()
+        lr_national.fit(X_national, y_national)
+
+        # Predict for future years
+        future_years = np.array([2025, 2026, 2027]).reshape(-1, 1)
+        national_predictions = lr_national.predict(future_years)
+
+        # Create visualization
+        years_all = [2022, 2023, 2024, 2025, 2026, 2027]
+        stations_all = list(y_national) + list(national_predictions)
+        types = ['Actual', 'Actual', 'Actual', 'Predicted', 'Predicted', 'Predicted']
+
+        national_df = pd.DataFrame({
+            'Year': years_all,
+            'Stations': [max(0, int(s)) for s in stations_all],
+            'Type': types
+        })
+
+        fig_national = px.bar(
+            national_df,
+            x='Year', y='Stations', color='Type',
+            title="National Charging Stations (Actual & Predicted)",
+            text='Stations'
+        )
+        fig_national.update_traces(texttemplate='%{text:,.0f}', textposition='outside')
+        fig_national.update_layout(paper_bgcolor="#112235", plot_bgcolor="#112235", font=dict(color="#9BAEC1"))
+        
+        # Side-by-side layout for infrastructure charts
+        c1_infra, c2_infra = st.columns(2)
+        with c1_infra:
+            st.plotly_chart(fig_st, use_container_width=True)
+            st.markdown(
+                "<h6 style='text-align: center; color: #F5CB5C;'>State-wise infrastructure growth and predictions.</h6>", 
+                unsafe_allow_html=True
+            )
+        
+        with c2_infra:
+            st.plotly_chart(fig_national, use_container_width=True)
+            st.markdown(
+                "<h6 style='text-align: center; color: #F5CB5C;'>National-level charging station trends and forecasts.</h6>", 
+                unsafe_allow_html=True
+            )
+
+        # ==================== 6️⃣ INFRASTRUCTURE vs ENERGY DEMAND ANALYSIS ====================
+        st.subheader("⚖️ Infrastructure Adequacy Analysis")
+
+        # Assumptions for analysis
+        avg_charger_power_kw = 50
+        chargers_per_station = 3
+        utilization_rate = 0.10
+        hours_per_quarter = 24 * 91
+
+        # Calculate quarterly charging capacity from predicted stations
+        quarterly_capacity = []
+        for year in [2026, 2027]:
+            year_idx = year - 2025
+            stations = national_predictions[year_idx]
+            
+            capacity_mwh = (stations * chargers_per_station * avg_charger_power_kw * 
+                        hours_per_quarter * utilization_rate / 1000)
+            
+            for q in range(3):
+                quarterly_capacity.append({
+                    'Quarter': f"Q{q+1} {year}",
+                    'Capacity_MWh': capacity_mwh,
+                    'Year': year,
+                    'Quarter_Num': q+1
+                })
+
+        capacity_df = pd.DataFrame(quarterly_capacity)
+
+        # Get predicted energy demand
+        future_energy_df = fleet_df.loc[fleet_df.index > ev_quarterly.index[-1]].reset_index()
+        future_energy_df = future_energy_df.head(12)
+        
+        future_energy_df['Year'] = future_energy_df['index'].dt.year
+        future_energy_df['Quarter_Num'] = future_energy_df['index'].dt.quarter
+        future_energy_df['Quarter_Period'] = future_energy_df['Year'].astype(str) + 'Q' + future_energy_df['Quarter_Num'].astype(str)
+        future_energy_df['Quarter'] = future_energy_df['Quarter_Period'] 
+        
+        future_energy_df = future_energy_df[
+            (future_energy_df['Year'] >= 2025) & (future_energy_df['Year'] <= 2027)
+        ].head(12)
+        
+        capacity_df['Quarter_Period'] = capacity_df.apply(
+            lambda x: f"{x['Year']}Q{x['Quarter_Num']}", axis=1
+        )
+        
+        comparison_df = capacity_df.merge(
+            future_energy_df[['Quarter_Period', 'TotalEnergy_MWh']], 
+            on='Quarter_Period', 
+            how='left'
+        )
+        
+        comparison_df['Surplus_Deficit_MWh'] = comparison_df['Capacity_MWh'] - comparison_df['TotalEnergy_MWh']
+        comparison_df['Adequacy_Ratio'] = comparison_df['Capacity_MWh'] / comparison_df['TotalEnergy_MWh']
+        
+        # Visualization
+        fig_compare = go.Figure()
+        fig_compare.add_trace(go.Bar(
+            x=comparison_df['Quarter'], 
+            y=comparison_df['Capacity_MWh'],
+            name='Infrastructure Capacity',
+            marker_color='lightblue'
+        ))
+        fig_compare.add_trace(go.Bar(
+            x=comparison_df['Quarter'], 
+            y=comparison_df['TotalEnergy_MWh'],
+            name='Energy Demand',
+            marker_color='coral'
+        ))
+        fig_compare.update_layout(
+            title="Charging Infrastructure Capacity vs Energy Demand (2026-2027)",
+            xaxis_title="Quarter",
+            yaxis_title="Energy (MWh)",
+            barmode='group',
+            paper_bgcolor="#112235", 
+            plot_bgcolor="#112235", 
+            font=dict(color="#9BAEC1")
+        )
+        
+        # Side-by-side layout for comparison chart and summary
+        c1_adequacy, c2_adequacy = st.columns([2, 1])
+        with c1_adequacy:
+            st.plotly_chart(fig_compare, use_container_width=True)
+            st.markdown(
+                "<h6 style='text-align: center; color: #F5CB5C;'>Comparison of infrastructure capacity vs predicted energy demand.</h6>", 
+                unsafe_allow_html=True
+            )
+        
+        with c2_adequacy:
+            # Summary metrics
+            avg_adequacy = comparison_df['Adequacy_Ratio'].mean()
+            min_adequacy = comparison_df['Adequacy_Ratio'].min()
+            deficit_quarters = (comparison_df['Surplus_Deficit_MWh'] < 0).sum()
+
+            st.markdown(f"""
+            <div style="
+                background-color:#0f1b33;
+                border: 1px solid #2e4057;
+                border-radius: 10px;
+                padding: 20px;
+                color:#B8C6DB;
+                font-size:15px;
+                line-height:1.8;">
+            <b>📊 Adequacy Summary</b><br><br>
+            • <b>Avg Ratio:</b> {avg_adequacy:.2f}x<br>
+            • <b>Min Ratio:</b> {min_adequacy:.2f}x<br>
+            • <b>Deficit Quarters:</b> {deficit_quarters}/{len(comparison_df)}<br><br>
+            <b>Interpretation:</b><br>
+            {'✅ Infrastructure is <b>adequate</b>.' if avg_adequacy >= 1.0 else '⚠️ Infrastructure may be <b>insufficient</b>.'}<br><br>
+            Ratio >1.0 = sufficient<br>
+            Ratio <1.0 = potential shortfall
+            </div>
+            """, unsafe_allow_html=True)
         
     elif st.session_state.input_type == "about":
         news_container = st.container(border=True)
