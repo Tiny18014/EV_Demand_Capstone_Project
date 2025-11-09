@@ -122,12 +122,15 @@ if __name__ == "__main__":
     df['Log_EV_Sales_Quantity'] = np.log1p(df['EV_Sales_Quantity'])
     df["Days_Since_Start"] = (df["Date"] - pd.to_datetime("2014-01-01")).dt.days
     print(df["Days_Since_Start"])
-    scaler = StandardScaler()
-    df[['Year', 'Month', 'month_sin', 'month_cos', 'Days_Since_Start']] = scaler.fit_transform(df[['Year', 'Month', 'month_sin', 'month_cos', 'Days_Since_Start']])
+    sscaler = StandardScaler()
+    df[['Year', 'Month', 'month_sin', 'month_cos', 'Days_Since_Start']] = sscaler.fit_transform(df[['Year', 'Month', 'month_sin', 'month_cos', 'Days_Since_Start']])
     finalcols = ['Vehicle_Class', 'Vehicle_Category','Month', 'month_sin', 'month_cos', 'State_EV_Group', 'Days_Since_Start','Log_EV_Sales_Quantity' ]
     dff = df[finalcols]
     og = pd.read_csv("src/data/qmldata/ready.csv")
     og = pd.concat([og, dff], ignore_index=True, axis=0)
     og.to_csv("src/data/qmldata/ready.csv")
+    import joblib
+    joblib.dump(scaler, "src/model/minmaxscaler.joblib")
+    joblib.dump(sscaler, "src/model/stdscaler.joblib")
 
 
