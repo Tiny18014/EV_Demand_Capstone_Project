@@ -3,7 +3,7 @@ name: QML Model Train States
 on:
   push:
     paths:
-      - "src/data/qmldata/**"
+      - "src/data/qmldata/states/**"
   workflow_dispatch:
 
 jobs:
