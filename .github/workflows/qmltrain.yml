@@ -30,18 +30,19 @@ jobs:
       - name: Find all changed datasets
         id: changed
         run: |
-          # Get list of files changed in the last commit (added or modified)
-          CHANGED_FILES=$(git diff --name-only --diff-filter=AM HEAD~1 HEAD -- src/data/qmldata/states/ | grep '\.csv$' || true)
-          
-          # Fallback: if nothing found, check entire folder
+          if git rev-parse HEAD~1 >/dev/null 2>&1; then
+            CHANGED_FILES=$(git diff --name-only --diff-filter=AM HEAD~1 HEAD -- src/data/qmldata/states/ | grep '\.csv$' || true)
+          else
+            CHANGED_FILES=$(find src/data/qmldata/states/ -type f -name "*.csv" || true)
+          fi
+
           if [ -z "$CHANGED_FILES" ]; then
             echo "No new or modified dataset files found."
           else
             echo "Detected the following changed data files:"
             echo "$CHANGED_FILES"
           fi
-          
-          # Export as GitHub env variable for downstream steps
+
           echo "CHANGED_FILES<<EOF" >> $GITHUB_ENV
           echo "$CHANGED_FILES" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
