@@ -5,8 +5,10 @@ from src.data.preprocess import preprocess
 import pandas as pd
 import streamlit as st
 import plotly.express as px
+import plotly.graph_objects as go
 from src.model.agent_sentiment import tech_to_business_agent
 from src.model.agent_charging import charging_intelligence_agent
+from src.data.stockcharge import get_ev_demand_analysis
 
 st.set_page_config(page_title='Capstone2025', page_icon='🏎️', layout="wide")
 
@@ -278,23 +280,7 @@ if 'input_type' in st.session_state:
 
     elif st.session_state.input_type == "charge":
         st.header('Charging Behavior and Energy Consumption Analysis')
-        st.markdown("Space for stock prices")
-        charge_container = st.container(border=True) 
-        #UNCOMMENT TO RUN AGENT
-        """with charge_container:
-            col_left, col_right = st.columns(2)
-            month_name = datetime.now().strftime("%B")
-            year = datetime.now().strftime("%Y")
-            output = charging_intelligence_agent.run(f"Generate the EV Charging Infrastructure Intelligence Report for India for {month_name}, {year}")
-            import re
-            x = re.sub(r"<think>.*?</think>", "", output.content, flags=re.DOTALL).strip()
-            x = re.sub(r"<tools>.*?</tools>", "", x, flags=re.DOTALL).strip()
-            x = re.sub(r"<references>.*?</references>", "", x, flags=re.DOTALL).strip()
-            half = len(x) // 2
-            with col_left: 
-                st.markdown(x[:half], unsafe_allow_html=False)
-            with col_right:
-                st.markdown(x[half:], unsafe_allow_html=False)"""
+        
 
         
     elif st.session_state.input_type == "about":
