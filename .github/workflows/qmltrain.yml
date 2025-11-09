@@ -1,9 +1,9 @@
-name: QML Model Train DF
+name: QML Model Train States
 
 on:
   push:
     paths:
-     - "src/data/qmldata/**"
+      - "src/data/qmldata/**"
   workflow_dispatch:
 
 jobs:
@@ -24,23 +24,54 @@ jobs:
           source cpfinal/bin/activate
           pip install -r requirements.txt
 
-      - name: Find changed dataset
+      # -------------------------------------------------------
+      # STEP 1: Identify all newly added or modified data files
+      # -------------------------------------------------------
+      - name: Find all changed datasets
         id: changed
         run: |
-          LATEST_FILE=$(git log -1 --pretty= --name-only -- src/data/qmldata/ | head -n 1)
-          echo "CHANGED_FILE=$LATEST_FILE" >> $GITHUB_ENV
+          # Get list of files changed in the last commit (added or modified)
+          CHANGED_FILES=$(git diff --name-only --diff-filter=AM HEAD~1 HEAD -- src/data/qmldata/states/ | grep '\.csv$' || true)
+          
+          # Fallback: if nothing found, check entire folder
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No new or modified dataset files found."
+          else
+            echo "Detected the following changed data files:"
+            echo "$CHANGED_FILES"
+          fi
+          
+          # Export as GitHub env variable for downstream steps
+          echo "CHANGED_FILES<<EOF" >> $GITHUB_ENV
+          echo "$CHANGED_FILES" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
-      - name: Run preprocessing
+      # -------------------------------------------------------
+      # STEP 2: Preprocess all changed datasets sequentially
+      # -------------------------------------------------------
+      - name: Run preprocessing for all changed datasets
+        if: env.CHANGED_FILES != ''
         run: |
           source cpfinal/bin/activate
-          python -m src.data.qmlpreprocess $CHANGED_FILE
+          for FILE in $CHANGED_FILES; do
+            echo "🔹 Preprocessing $FILE ..."
+            python -m src.data.qmlpreprocess "$FILE"
+          done
 
+      # -------------------------------------------------------
+      # STEP 3: Retrain model on updated data
+      # -------------------------------------------------------
       - name: Run retraining script
+        if: env.CHANGED_FILES != ''
         run: |
           source cpfinal/bin/activate
           python -m src.model.qmltrain
 
+      # -------------------------------------------------------
+      # STEP 4: Commit and push the retrained model + ready data
+      # -------------------------------------------------------
       - name: Commit updated model
+        if: env.CHANGED_FILES != ''
         run: |
           git config user.name "theboredflamingo"
           git config user.email "stuthi.shrisha@gmail.com"
@@ -51,5 +82,6 @@ jobs:
           git commit -m "Updated model retrain with new data"
           git push origin master
         env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
