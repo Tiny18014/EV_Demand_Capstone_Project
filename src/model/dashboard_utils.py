@@ -39,22 +39,20 @@ warnings.filterwarnings("ignore")
 
 # --- AGENT CONFIGURATION & INITIALIZATION ---
 
+from huggingface_hub import InferenceClient
+from textwrap import dedent
+
+# --- AGENT CONFIGURATION & INITIALIZATION ---
 HF_TOKEN = st.secrets.get("DF_AGENT")
-HF_ROUTER_BASE_URL = "https://router.huggingface.co/v1"
 LLM_MODEL_ID = "openai/gpt-oss-20b"
 LLM_CLIENT = None
 
 if HF_TOKEN:
     try:
-        LLM_CLIENT = OpenAI(
-            base_url=HF_ROUTER_BASE_URL,
-            api_key=HF_TOKEN,
-            timeout=60.0,
-            max_retries=2
-        )
-        print(f"OpenAI Client initialized for Hugging Face Router with {LLM_MODEL_ID}.")
+        LLM_CLIENT = InferenceClient(model=LLM_MODEL_ID, token=HF_TOKEN)
+        print(f"Hugging Face InferenceClient initialized for {LLM_MODEL_ID}.")
     except Exception as e:
-        print(f"Error initializing OpenAI client for HF Router: {e}")
+        print(f"Error initializing Hugging Face InferenceClient: {e}")
         LLM_CLIENT = None
 
 
@@ -83,27 +81,33 @@ class DashboardAgent:
         """)
 
     def invoke(self, model_type: str, data_summary: str):
-        """Builds prompt and queries the LLM."""
+        """Builds prompt and queries the LLM through Hugging Face."""
+        if not LLM_CLIENT:
+            raise RuntimeError("LLM client not initialized. Check your DF_AGENT secret or Hugging Face connection.")
+
         system_prompt = self.description
         user_prompt = dedent(f"""
             {self.instructions}
-            
+
             INPUT DATA (Model: {model_type}):
             {data_summary}
-            
+
             Now, generate the report following the OUTPUT STYLE.
         """)
 
-        return LLM_CLIENT.chat.completions.create(
-            model=LLM_MODEL_ID,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            temperature=0.25,
-            max_tokens=512,
-        )
-
+        try:
+            response = LLM_CLIENT.chat.completions.create(
+                model=LLM_MODEL_ID,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                temperature=0.25,
+                max_tokens=512,
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as e:
+            return f"### {model_type} Model Forecast Analysis (2025)\n\n⚠️ Agent Error: {e}"
 
 # Instantiate global agent
 report_agent = DashboardAgent()
