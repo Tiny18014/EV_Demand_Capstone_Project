@@ -15,7 +15,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.linear_model import LinearRegression
 from src.model.predict import forecast_ev_sales
 from textwrap import dedent
-from openai import OpenAI
+
 
 
 
@@ -309,6 +309,7 @@ if 'input_type' in st.session_state:
 
         forecast_df, forecast_fig = generate_on_demand_forecast(selected_category, selected_state, days_to_forecast)
         st.plotly_chart(forecast_fig, use_container_width=True)
+
         col1, col2 = st.columns([3,2])
         with col1:
             st.markdown("QML Model Forecasts for EV Sales in 2025")
