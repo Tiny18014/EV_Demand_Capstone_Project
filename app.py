@@ -290,7 +290,6 @@ if 'input_type' in st.session_state:
         from src.model.dashboard_utils import (
             get_2025_data,
             run_classical_predictions,
-            run_qml_predictions,
             generate_agent_report,
             generate_on_demand_forecast,
             DATA_PATH
