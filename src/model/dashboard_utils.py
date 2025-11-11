@@ -21,11 +21,11 @@ from openai import OpenAI
 # --- Path and Model Setup ---
 
 ROOT_DIR = Path(__file__).parent.parent.resolve()
-DATA_PATH = ROOT_DIR / "src" / "data" / "cmldata" / "EV_Dataset.csv"
-MODELS_DIR = ROOT_DIR / "src" / "model"
+DATA_PATH = ROOT_DIR /"data" / "cmldata" / "EV_Dataset.csv"
+MODELS_DIR = ROOT_DIR /"model"
 CLASSICAL_MODEL_PREFIX = "advanced_model_"
 
-sys.path.append(str(ROOT_DIR / "src" / "model"))
+sys.path.append(str(ROOT_DIR /"model"))
 
 # CRITICAL IMPORTS from training script
 try:
