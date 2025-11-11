@@ -8,7 +8,7 @@ import joblib
 
 
 df = pd.read_csv("src/data/qmldata/ready.csv")
-X = df[['Vehicle_Class', 'Vehicle_Category', 'Month', 'month_sin', 'month_cos', 'State_EV_Group', 'Days_Since_Start']].values
+X = df[['Vehicle_Class', 'Vehicle_Category', 'Month_scaled', 'month_sin', 'month_cos', 'State_EV_Group', 'Days_Since_Start']].values
 y = df['Log_EV_Sales_Quantity'].values
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)

@@ -70,7 +70,7 @@ state_ev_groups = [
     "high_ev_states", "moderate_ev_states", "low_ev_states"
 ]  # replace if you have more granular categories
 
-months = [1,2,3,4,5,6,7,8,9,10, 11, 12]  # October, November, December
+months = [10, 11, 12]  # October, November, December
 year = 2025
 start_ref_date = pd.to_datetime("2014-01-01")
 

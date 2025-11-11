@@ -124,8 +124,8 @@ if __name__ == "__main__":
     df["Days_Since_Start"] = (df["Date"] - pd.to_datetime("2014-01-01")).dt.days
     print(df["Days_Since_Start"])
     sscaler = joblib.load("src/model/standardscaler.joblib")
-    df[['Year', 'Month', 'month_sin', 'month_cos', 'Days_Since_Start']] = sscaler.fit_transform(df[['Year', 'Month', 'month_sin', 'month_cos', 'Days_Since_Start']])
-    finalcols = ['Vehicle_Class', 'Vehicle_Category','Month', 'month_sin', 'month_cos', 'State_EV_Group', 'Days_Since_Start','Log_EV_Sales_Quantity' ]
+    df[['Year_scaled', 'Month_scaled', 'month_sin', 'month_cos', 'Days_Since_Start']] = sscaler.fit_transform(df[['Year', 'Month', 'month_sin', 'month_cos', 'Days_Since_Start']])
+    finalcols = ["Year", "Month_scaled", 'Vehicle_Class', 'Vehicle_Category','Month', 'month_sin', 'month_cos', 'State_EV_Group', 'Days_Since_Start','Log_EV_Sales_Quantity' ]
     dff = df[finalcols]
     og = pd.read_csv("src/data/qmldata/ready.csv")
     og = pd.concat([og, dff], ignore_index=True, axis=0)

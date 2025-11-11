@@ -281,6 +281,26 @@ if 'input_type' in st.session_state:
 
     elif st.session_state.input_type == "demand":
         st.header('Sales Forecasting')
+        df = pd.read_csv("src/data/qmldata/jul_aug_sep.csv")
+
+        fig = px.line(
+            df,
+            x="Days_Since_Start",
+            y="Log_EV_Sales_Quantity",
+            markers=True,
+            title="Sales Trend"
+        )
+
+        # --- Customize appearance ---
+        fig.update_layout(
+            xaxis_title="Month",
+            yaxis_title="Log EV Sales Quantity",
+            template="plotly_white",
+            hovermode="x unified"
+        )
+
+        # --- Display in Streamlit ---
+        st.plotly_chart(fig, use_container_width=True)
 
     elif st.session_state.input_type == "charge":
         st.header('Charging Behavior and Energy Consumption Analysis')
