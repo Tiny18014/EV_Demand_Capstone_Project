@@ -14,6 +14,10 @@ from statsmodels.tsa.statespace.sarimax import SARIMAX
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.linear_model import LinearRegression
 from src.model.predict import forecast_ev_sales
+from textwrap import dedent
+from openai import OpenAI
+
+
 
 st.set_page_config(page_title='Capstone2025', page_icon='🏎️', layout="wide")
 
@@ -282,6 +286,29 @@ if 'input_type' in st.session_state:
 
     elif st.session_state.input_type == "demand":
         st.header('Sales Forecasting')
+        # ==================== AGENT & FORECAST CORE SETUP ====================
+        from src.model.dashboard_utils import (
+            get_2025_data,
+            run_classical_predictions,
+            run_qml_predictions,
+            generate_agent_report,
+            generate_on_demand_forecast,
+            DATA_PATH
+        )
+
+        df_2025 = get_2025_data()
+        classical_preds = run_classical_predictions(df_2025)
+        qml_preds = run_qml_predictions(df_2025)
+        classical_report = generate_agent_report(classical_preds, "Classical")
+        qml_report = generate_agent_report(qml_preds, "Quantum-Hybrid")
+
+        st.subheader("On-Demand Regional Forecasts")
+        selected_category = st.selectbox("Select Vehicle Category", ["Two Wheeler", "Three Wheeler", "Four Wheeler"])
+        selected_state = st.selectbox("Select State/Region", ["Maharashtra", "Karnataka", "Tamil Nadu", "Delhi", "Gujarat"])
+        days_to_forecast = st.slider("Forecast Horizon (days)", 7, 60, 30)
+
+        forecast_df, forecast_fig = generate_on_demand_forecast(selected_category, selected_state, days_to_forecast)
+        st.plotly_chart(forecast_fig, use_container_width=True)
         col1, col2 = st.columns([3,2])
         with col1:
             st.markdown("QML Model Forecasts for EV Sales in 2025")
@@ -365,6 +392,7 @@ if 'input_type' in st.session_state:
             st.markdown("Classical Model Forecasts for EV Sales in 2025")
         with col2:
             st.markdown("Agent")
+
             
 
     elif st.session_state.input_type == "charge":

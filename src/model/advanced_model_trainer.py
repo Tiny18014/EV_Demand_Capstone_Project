@@ -26,10 +26,10 @@ warnings.filterwarnings('ignore')
 
 # Define paths
 ROOT_DIR = Path(__file__).parent.parent.resolve()
-DATA_PATH = ROOT_DIR / "data" / "EV_Dataset.csv"
-MODEL_PATH = ROOT_DIR / "models" / "advanced_ev_model.pkl"
-SCALER_PATH = ROOT_DIR / "models" / "feature_scaler.pkl"
-FEATURE_NAMES_PATH = ROOT_DIR / "models" / "feature_names.pkl"
+DATA_PATH = "src/data/cmldata/EV_Dataset.csv"
+MODEL_PATH = "src/model/advanced_ev_model.pkl"
+SCALER_PATH = "src/model/feature_scaler.pkl"
+FEATURE_NAMES_PATH = "src/model/feature_names.pkl"
 
 print("🚀 Advanced EV Demand Forecasting Model Trainer")
 print("=" * 60)
