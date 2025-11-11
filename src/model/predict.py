@@ -113,21 +113,21 @@ df = future_df.copy()
 for col in categorical_cols:
     e = LabelEncoder()
     df[col] = e.fit_transform(df[col])
-group_le = LabelEncoder()
+group_le = joblib.load("src/model/statele.joblib")
 df['State_EV_Group'] = group_le.fit_transform(df['State_EV_Group'])
-scaler = MinMaxScaler(feature_range=(-1, 1))
+scaler = joblib.load("src/model/minmaxscaler.joblib")
 features_to_use = ['Vehicle_Class', 'State_EV_Group', 'Year',
                       'Vehicle_Category','month_sin', 'month_cos']
 X = scaler.fit_transform(df[features_to_use])
 df['Date'] = pd.to_datetime(df['Date'])
 df["Days_Since_Start"] = (df["Date"] - pd.to_datetime("2014-01-01")).dt.days
 print(df["Days_Since_Start"])
-scaler = StandardScaler()
-df[['Year', 'Month_scaled', 'month_sin', 'month_cos', 'Days_Since_Start']] = scaler.fit_transform(df[['Year', 'Month', 'month_sin', 'month_cos', 'Days_Since_Start']])
+sscaler = joblib.load("src/model/standardscaler.joblib")
+df[['Year', 'Month_scaled', 'month_sin', 'month_cos', 'Days_Since_Start']] = sscaler.fit_transform(df[['Year', 'Month', 'month_sin', 'month_cos', 'Days_Since_Start']])
 finalcols = ['Vehicle_Class', 'Vehicle_Category','Month', 'month_sin', 'month_cos', 'State_EV_Group', 'Days_Since_Start','Log_EV_Sales_Quantity' ]
 dff = df[finalcols]
 print(df[["Month_scaled", "Month","Days_Since_Start" ]].drop_duplicates())
-"""
+
 X = dff[['Vehicle_Class', 'Vehicle_Category', 'Month', 'month_sin', 'month_cos', 'State_EV_Group', 'Days_Since_Start']].values
 
 
@@ -152,5 +152,5 @@ def generate_embeddings(X):
 X_future_embeddings = generate_embeddings(X)
 model3 = joblib.load("src/model/xgboostqml.joblib")
 y_pred = model3.predict(X_future_embeddings)
-print(y_pred)"""
+print(y_pred)
 
