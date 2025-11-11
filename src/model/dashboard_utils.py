@@ -80,57 +80,42 @@ class DashboardAgent:
             - Tone: Executive, realistic, commercially relevant.
         """)
 
-    def invoke(self, model_type: str, data_summary: str):
-        """Builds prompt and queries the LLM through Hugging Face."""
-        if not LLM_CLIENT:
-            raise RuntimeError("LLM client not initialized. Check your DF_AGENT secret or Hugging Face connection.")
+        def invoke(self, model_type: str, data_summary: str):
+            """Builds prompt and queries the Hugging Face text-generation API."""
+            if not LLM_CLIENT:
+                raise RuntimeError("LLM client not initialized. Check your DF_AGENT secret or Hugging Face connection.")
 
-        system_prompt = self.description
-        user_prompt = dedent(f"""
-            {self.instructions}
+            system_prompt = self.description
+            user_prompt = dedent(f"""
+                {self.instructions}
 
-            INPUT DATA (Model: {model_type}):
-            {data_summary}
+                INPUT DATA (Model: {model_type}):
+                {data_summary}
 
-            Now, generate the report following the OUTPUT STYLE.
-        """)
+                Now, generate the report following the OUTPUT STYLE.
+            """)
 
-        try:
-            response = LLM_CLIENT.chat.completions.create(
-                model=LLM_MODEL_ID,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
-                ],
-                temperature=0.25,
-                max_tokens=512,
-            )
+            try:
+                full_prompt = f"{system_prompt}\n\n{user_prompt}"
 
-            # ✅ Handle OpenAI-style response
-            if hasattr(response, "choices"):
-                return response.choices[0].message.content.strip()
+                response = LLM_CLIENT.text_generation(
+                    prompt=full_prompt,
+                    max_new_tokens=512,
+                    temperature=0.25,
+                    stream=False,
+                )
 
-            # ✅ Handle plain string (HF streaming or simplified response)
-            elif isinstance(response, str):
-                return response.strip()
+                if isinstance(response, str):
+                    return response.strip()
 
-            # ✅ Handle generator or dict fallback
-            elif isinstance(response, dict) and "generated_text" in response:
-                return response["generated_text"].strip()
-            elif hasattr(response, "__iter__"):
-                text = ""
-                for chunk in response:
-                    if isinstance(chunk, dict) and "generated_text" in chunk:
-                        text += chunk["generated_text"]
-                    elif isinstance(chunk, str):
-                        text += chunk
-                return text.strip() or "⚠️ Empty response from model."
+                if isinstance(response, dict) and "generated_text" in response:
+                    return response["generated_text"].strip()
 
-            else:
                 return f"⚠️ Unexpected response type: {type(response)}"
 
-        except Exception as e:
-            return f"### {model_type} Model Forecast Analysis (2025)\n\n⚠️ Agent Error: {e}"
+            except Exception as e:
+                return f"### {model_type} Model Forecast Analysis (2025)\n\n⚠️ Agent Error: {e}"
+
 
 
 # Instantiate global agent
