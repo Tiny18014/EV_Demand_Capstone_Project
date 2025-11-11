@@ -105,9 +105,33 @@ class DashboardAgent:
                 temperature=0.25,
                 max_tokens=512,
             )
-            return response.choices[0].message.content.strip()
+
+            # ✅ Handle OpenAI-style response
+            if hasattr(response, "choices"):
+                return response.choices[0].message.content.strip()
+
+            # ✅ Handle plain string (HF streaming or simplified response)
+            elif isinstance(response, str):
+                return response.strip()
+
+            # ✅ Handle generator or dict fallback
+            elif isinstance(response, dict) and "generated_text" in response:
+                return response["generated_text"].strip()
+            elif hasattr(response, "__iter__"):
+                text = ""
+                for chunk in response:
+                    if isinstance(chunk, dict) and "generated_text" in chunk:
+                        text += chunk["generated_text"]
+                    elif isinstance(chunk, str):
+                        text += chunk
+                return text.strip() or "⚠️ Empty response from model."
+
+            else:
+                return f"⚠️ Unexpected response type: {type(response)}"
+
         except Exception as e:
             return f"### {model_type} Model Forecast Analysis (2025)\n\n⚠️ Agent Error: {e}"
+
 
 # Instantiate global agent
 report_agent = DashboardAgent()
