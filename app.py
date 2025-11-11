@@ -59,6 +59,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Embed the logo in the HTML
+#VoltSight
 st.markdown(f"""
     <div style="text-align: center;">
         <h1>EV Analysis</h1>
@@ -67,7 +68,7 @@ st.markdown(f"""
     """, unsafe_allow_html=True)
 st.write("")
 
-st.markdown("<p style='text-align: center;'>This app powers into the EV future — predicting sales, gauging public buzz, and decoding how drivers charge up and use their rides. It’s your data-driven dashboard for spotting the next big spark in electric mobility.</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center;'>This app drives the electric revolution forward — forecasting EV sales, measuring public sentiment, and decoding real-world charging and usage patterns. A data-driven command center for identifying emerging trends and the next surge in electric mobility.</p>", unsafe_allow_html=True)
 st.write("")
 st.write("")
 
