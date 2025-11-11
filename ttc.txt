@@ -81,3 +81,57 @@ Other
 | **Alert / Warning Text**        | #EF476F | Bright fuchsia-red                                                       | For error, anomaly, or alert states — clean contrast against both background and amber. |
 
 
+col_stock, col_agent = st.columns([2,3])
+        with col_stock:
+            period = st.selectbox("Select Analysis Window", ["1wk", "1mo", "3mo"])
+            analysis = get_ev_demand_analysis(period)
+            df = analysis["summary_table"]
+            fig = go.Figure()
+            fig.add_trace(go.Bar(
+                x=df["Company"],
+                y=df["Total % Change"],
+                name="Total % Change",
+                marker=dict(color="rgb(26, 118, 255)"),
+                opacity=0.8
+            ))
+            fig.add_trace(go.Bar(
+                x=df["Company"],
+                y=df["Volatility (%)"],
+                name="Volatility (%)",
+                marker=dict(color="rgb(255, 127, 14)"),
+                opacity=0.8
+            ))
+            fig.update_layout(
+                barmode="group",
+                title=dict(
+                    text="Comparison of Total % Change and Volatility",
+                    x=0.5,
+                    xanchor="center"
+                ),
+                xaxis_title="Company",
+                yaxis_title="Value",
+                legend_title="Metrics",
+                height=500
+            )
+            st.plotly_chart(fig, use_container_width=True)
+            st.metric("Charging Demand Index (CDI)", analysis["demand_index"], delta=analysis["demand_trend"])
+            st.markdown(f"**Interpretation:** {analysis['insights']}")
+            st.caption(f"Last updated: {analysis['timestamp']}")
+
+        with col_agent:
+            charge_container = st.container(border=True) 
+            #UNCOMMENT TO RUN AGENT
+            """with charge_container:
+                col_left, col_right = st.columns(2)
+                month_name = datetime.now().strftime("%B")
+                year = datetime.now().strftime("%Y")
+                output = charging_intelligence_agent.run(f"Generate the EV Charging Infrastructure Intelligence Report for India for {month_name}, {year}")
+                import re
+                x = re.sub(r"<think>.*?</think>", "", output.content, flags=re.DOTALL).strip()
+                x = re.sub(r"<tools>.*?</tools>", "", x, flags=re.DOTALL).strip()
+                x = re.sub(r"<references>.*?</references>", "", x, flags=re.DOTALL).strip()
+                half = len(x) // 2
+                with col_left: 
+                    st.markdown(x[:half], unsafe_allow_html=False)
+                with col_right:
+                    st.markdown(x[half:], unsafe_allow_html=False)"""

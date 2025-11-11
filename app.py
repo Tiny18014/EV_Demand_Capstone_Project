@@ -9,7 +9,7 @@ import plotly.graph_objects as go
 from src.model.agent_sentiment import tech_to_business_agent
 from src.model.agent_charging import charging_intelligence_agent
 from src.data.stockcharge import get_ev_demand_analysis
-
+import numpy as np
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.linear_model import LinearRegression
@@ -284,9 +284,6 @@ if 'input_type' in st.session_state:
 
     elif st.session_state.input_type == "charge":
         st.header('Charging Behavior and Energy Consumption Analysis')
-        
-
-
         # ==================== LOAD DATA ====================
         reg_path = "src/data/final_monthwise_registrations.csv"
         stations_path = "src/data/state_wise_stations.xlsx"
