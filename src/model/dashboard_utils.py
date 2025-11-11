@@ -228,9 +228,6 @@ def _generate_fallback_insights_text(predictions_df: pd.DataFrame, model_type: s
 def generate_on_demand_forecast(category: str, state: str, days_to_forecast: int):
     """Generate a forecast for a specific region and vehicle type."""
     category_file = category.replace(" ", "_").replace("/", "_")
-    print(category_file)
-    if category_file == "Two_Wheeler":
-        category_file = "2-Wheelers"
     model_path = MODELS_DIR / f"advanced_model_{category_file}.pkl"
 
     if not model_path.exists():

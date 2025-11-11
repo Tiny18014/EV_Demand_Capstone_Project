@@ -301,7 +301,7 @@ if 'input_type' in st.session_state:
 
 
         st.subheader("On-Demand Regional Forecasts")
-        selected_category = st.selectbox("Select Vehicle Category", ["Two Wheeler", "Three Wheeler", "Four Wheeler"])
+        selected_category = st.selectbox("Select Vehicle Category", ["2-Wheelers", "3-Wheelers", "4-Wheelers"])
         selected_state = st.selectbox("Select State/Region", ["Maharashtra", "Karnataka", "Tamil Nadu", "Delhi", "Gujarat"])
         days_to_forecast = st.slider("Forecast Horizon (days)", 7, 60, 30)
 
