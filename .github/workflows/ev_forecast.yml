@@ -56,7 +56,7 @@ jobs:
           git config --global user.name 'GitHub Actions Bot'
           git config --global user.email 'actions-bot@github.com'
           # Add the updated master dataset and all model artifacts
-          git add src/data/EV_Dataset.csv
+          git add src/data/cmldata/EV_Dataset.csv
           git add src/model/*.pkl
           # Commit only if there are actual changes
           git diff --staged --quiet || git commit -m "Auto-train: Update model and dataset"
