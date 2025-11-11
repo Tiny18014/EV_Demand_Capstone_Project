@@ -113,7 +113,7 @@ report_agent = DashboardAgent()
 @st.cache_data
 def get_2025_data():
     """Load and prepare data for the year 2025."""
-    df = pd.read_csv("data/cmldata/EV_Dataset.csv", parse_dates=["Date"], low_memory=False)
+    df = pd.read_csv("src/data/cmldata/EV_Dataset.csv", parse_dates=["Date"], low_memory=False)
     df_2025 = df[df["Date"].dt.year == 2025].copy()
 
     if df_2025.empty:
