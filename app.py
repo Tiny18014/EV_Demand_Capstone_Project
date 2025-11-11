@@ -307,6 +307,7 @@ if 'input_type' in st.session_state:
 
         forecast_df, forecast_fig = generate_on_demand_forecast(selected_category, selected_state, days_to_forecast)
         print("DEBUG:", type(forecast_fig), forecast_fig)
+        
         st.plotly_chart(forecast_fig, use_container_width=True)
 
         col1, col2 = st.columns([3,2])
@@ -392,6 +393,7 @@ if 'input_type' in st.session_state:
             st.markdown("Classical Model Forecasts for EV Sales in 2025")
         with col2:
             st.markdown("Agent")
+            st.markdown(classical_report)
 
             
 
