@@ -13,6 +13,7 @@ import numpy as np
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.linear_model import LinearRegression
+from src.model.predict import forecast_ev_sales
 
 st.set_page_config(page_title='Capstone2025', page_icon='🏎️', layout="wide")
 
@@ -281,26 +282,90 @@ if 'input_type' in st.session_state:
 
     elif st.session_state.input_type == "demand":
         st.header('Sales Forecasting')
-        df = pd.read_csv("src/data/qmldata/jul_aug_sep.csv")
+        col1, col2 = st.columns([3,2])
+        with col1:
+            st.markdown("QML Model Forecasts for EV Sales in 2025")
+            df = pd.read_csv("src/data/qmldata/jul_aug_sep.csv")
+            forecast_df = forecast_ev_sales(year=2025, months=[9, 10, 11, 12])
 
-        fig = px.line(
-            df,
-            x="Days_Since_Start",
-            y="Log_EV_Sales_Quantity",
-            markers=True,
-            title="Sales Trend"
-        )
+            # --- Standardize and combine ---
+            forecast_df = forecast_df.rename(columns={
+                "Predicted_Log_EV_Sales_Quantity": "Log_EV_Sales_Quantity"
+            })
+            forecast_df["Type"] = "Forecast"
+            df["Type"] = "Historical"
 
-        # --- Customize appearance ---
-        fig.update_layout(
-            xaxis_title="Month",
-            yaxis_title="Log EV Sales Quantity",
-            template="plotly_white",
-            hovermode="x unified"
-        )
+            combined_df = pd.concat([df, forecast_df], ignore_index=True)
+            combined_df = combined_df.sort_values(by="Month")
 
-        # --- Display in Streamlit ---
-        st.plotly_chart(fig, use_container_width=True)
+            vehicle_options = sorted(combined_df["Vehicle_Category"].dropna().unique())
+            state_options = sorted(combined_df["State_EV_Group"].dropna().unique())
+
+            selected_vehicle = st.selectbox("Select Vehicle Category (optional)", ["All"] + vehicle_options)
+            selected_state = st.selectbox("Select State EV Group (optional)", ["All"] + state_options)
+
+            # --- Apply filters based on user choice ---
+            filtered_df = combined_df.copy()
+
+            if selected_vehicle != "All":
+                filtered_df = filtered_df[filtered_df["Vehicle_Category"] == selected_vehicle]
+
+            if selected_state != "All":
+                filtered_df = filtered_df[filtered_df["State_EV_Group"] == selected_state]
+
+            # --- Determine coloring logic ---
+            if selected_vehicle != "All" and selected_state == "All":
+                color_col = "State_EV_Group"        # user picked category → color by state
+            elif selected_vehicle == "All" and selected_state != "All":
+                color_col = "Vehicle_Category"      # user picked state → color by category
+            else:
+                color_col = None                    # both selected or both “All” → single color
+
+            # --- Build figure ---
+            if color_col:
+                fig = px.line(
+                    filtered_df,
+                    x="Month",
+                    y="Log_EV_Sales_Quantity",
+                    color=color_col,
+                    line_dash="Type",
+                    markers=True,
+                    title="EV Sales Trend (Historical + Forecast)"
+                )
+            else:
+                fig = px.line(
+                    filtered_df,
+                    x="Month",
+                    y="Log_EV_Sales_Quantity",
+                    line_dash="Type",
+                    markers=True,
+                    title="EV Sales Trend (Historical + Forecast)",
+                    color_discrete_sequence=["#1f77b4"]
+                )
+
+            # --- Layout polish ---
+            fig.update_layout(
+                xaxis_title="Month",
+                yaxis_title="Log EV Sales Quantity",
+                template="plotly_white",
+                hovermode="x unified",
+                legend_title_text="",
+                title_x=0.05
+            )
+            fig.update_traces(line=dict(width=3))
+
+            # Distinguish forecast visually (dashed line)
+            fig.for_each_trace(
+                lambda trace: trace.update(line=dict(dash="dash")) if "Forecast" in trace.name else None
+            )
+
+            # --- Display ---
+            st.plotly_chart(fig, use_container_width=True)
+
+            st.markdown("Classical Model Forecasts for EV Sales in 2025")
+        with col2:
+            st.markdown("Agent")
+            
 
     elif st.session_state.input_type == "charge":
         st.header('Charging Behavior and Energy Consumption Analysis')

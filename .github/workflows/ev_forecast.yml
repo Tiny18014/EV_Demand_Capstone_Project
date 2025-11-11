@@ -1,0 +1,63 @@
+name: EV Demand Forecast CI/CD
+
+on:
+  # TRIGGER 1: Run on the 1st of every month
+  schedule:
+    - cron: '30 2 1 * *'
+
+  # TRIGGER 2: Run when a new Excel/CSV file is pushed to the 'data/' directory
+  push:
+    branches:
+      - main
+    paths:
+      - 'data/**.xlsx'
+      - 'data/**.csv'
+      # Exclude the master dataset itself from triggering a run to prevent loops
+      - '!data/EV_Dataset.csv'
+
+  # TRIGGER 3: Allow manual runs
+  workflow_dispatch:
+
+jobs:
+  forecast-pipeline:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: '1. Checkout Repository'
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.ACTIONS_PAT }}
+          fetch-depth: 0
+
+      - name: '2. Set up Python Environment'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: '3. Install Git LFS'
+        run: |
+          git lfs install
+          git lfs pull
+
+      - name: '4. Install Dependencies'
+        run: pip install -r reqs.txt
+
+      - name: '5. Preprocess and Combine New Data'
+        run: python src/model/run_pipeline.py --mode datapush
+
+      - name: '6. Train Advanced Model'
+        run: python src/model/advanced_model_trainer.py
+
+      - name: '7. Commit New Model and Updated Dataset'
+        run: |
+          git config --global user.name 'GitHub Actions Bot'
+          git config --global user.email 'actions-bot@github.com'
+          # Add the updated master dataset and all model artifacts
+          git add src/data/EV_Dataset.csv
+          git add src/model/*.pkl
+          # Commit only if there are actual changes
+          git diff --staged --quiet || git commit -m "Auto-train: Update model and dataset"
+          git push
