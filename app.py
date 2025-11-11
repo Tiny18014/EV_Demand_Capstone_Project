@@ -297,9 +297,8 @@ if 'input_type' in st.session_state:
 
         df_2025 = get_2025_data()
         classical_preds = run_classical_predictions(df_2025)
-        qml_preds = run_qml_predictions(df_2025)
         classical_report = generate_agent_report(classical_preds, "Classical")
-        qml_report = generate_agent_report(qml_preds, "Quantum-Hybrid")
+
 
         st.subheader("On-Demand Regional Forecasts")
         selected_category = st.selectbox("Select Vehicle Category", ["Two Wheeler", "Three Wheeler", "Four Wheeler"])
