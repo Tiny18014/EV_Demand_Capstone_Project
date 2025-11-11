@@ -267,7 +267,7 @@ if 'input_type' in st.session_state:
             st.subheader("Brand-Level Analysis")
             st.markdown("<p style='color: #9BAEC1;'>Our agent combines model results with sentiment trends for clear business insights.</p>", unsafe_allow_html=True)
             #UNCOMMENT TO RUN AGENT
-            """progress = st.progress(0)
+            progress = st.progress(0)
             insights = []
 
             for i, (_, row) in enumerate(brand_summary.iterrows()):
@@ -277,7 +277,7 @@ if 'input_type' in st.session_state:
             st.success("Analysis complete ✅")
             for insight in insights:
                 with st.expander(insight.split('\n')[0].strip('#').strip(), expanded=False):
-                    st.markdown(insight, unsafe_allow_html=False)"""
+                    st.markdown(insight, unsafe_allow_html=False)
         with c2:
             st.subheader("Model Metrics")
             st.metric(label="Accuracy", value=f"{accuracy.get():.2%}")
@@ -826,13 +826,13 @@ if 'input_type' in st.session_state:
             col_left, col_right = st.columns(2)
             from src.model.news import fetch_news_data
             #UNCOMMENT TO RUN AGENT 
-            """news_summary = fetch_news_data()
+            news_summary = fetch_news_data()
             half = len(news_summary) // 2
             with col_left:
                 st.header('On the Headlines')
                 st.markdown(news_summary[:half])
             with col_right:
-                st.markdown(news_summary[half:])"""
+                st.markdown(news_summary[half:])
 
         col_why, col_about = st.columns([2,1]) 
         with col_why:
