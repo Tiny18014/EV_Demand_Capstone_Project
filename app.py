@@ -306,6 +306,7 @@ if 'input_type' in st.session_state:
         days_to_forecast = st.slider("Forecast Horizon (days)", 7, 60, 30)
 
         forecast_df, forecast_fig = generate_on_demand_forecast(selected_category, selected_state, days_to_forecast)
+        print("DEBUG:", type(forecast_fig), forecast_fig)
         st.plotly_chart(forecast_fig, use_container_width=True)
 
         col1, col2 = st.columns([3,2])
