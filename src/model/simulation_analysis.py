@@ -58,9 +58,9 @@ def create_performance_graph(df):
         xaxis_title="Timestamp",
         yaxis_title="EV Sales Quantity",
         legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
-        paper_bgcolor="#112235",
-        plot_bgcolor="#1c2a38",
-        font=dict(color="#E0E6ED")
+        paper_bgcolor="#bef0e5",
+        plot_bgcolor="#bef0e5",
+        font=dict(color="#0A0A0A")
     )
     return fig
 
