@@ -318,8 +318,8 @@ if 'input_type' in st.session_state:
                 
                 st.markdown(f"""
                 <div style="
-                    background-color:#E8F0EB;
-                    border: 1px solid #E8F0EB;
+                    background-color:#bef0e5;
+                    border: 1px solid #bef0e5;
                     border-radius: 10px;
                     padding: 20px;
                     color:#0A0A0A;
