@@ -1,2 +1,27 @@
 [server]
 fileWatcherType = "none"
+
+[theme]
+# General color setup
+base = "light"
+primaryColor = "#00A6A6"
+backgroundColor = "#bef0e5ff"
+secondaryBackgroundColor = "#E9EFF3"
+textColor = "#0A0A0A"
+
+# Widgets
+showWidgetBorder = true
+borderColor = "#314158"
+
+# Dataframes
+dataframeHeaderBackgroundColor = "#1d293d"
+
+# Base text
+font = "'Montserrat':https://fonts.googleapis.com/css2?family=Montserrat:wght@300..700&display=swap"
+baseFontWeight = 300
+baseFontSize = 16
+
+# Heading text
+headingFont = "Montserrat"
+headingFontWeights = [300, 400, 400, 300, 300, 300]
+headingFontSizes = ["2.5rem", "1.5rem", "1rem"]

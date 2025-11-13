@@ -19,60 +19,21 @@ from textwrap import dedent
 
 
 
-st.set_page_config(page_title='Capstone2025', page_icon='🏎️', layout="wide")
+st.set_page_config(
+    page_title='Capstone2025',
+    page_icon='🏎️',
+    layout="wide"
+)
 
-st.markdown("""
-    <style>
-        .stApp {
-            background-color: #112235;
-            color: #E0E6ED;
-        }
-        .stTextArea textarea {
-            background-color: #f2f2f2;
-            color: #006064;
-        }
-        .stButton button {
-            background-color: #f5cb5c;
-            color: #0D1B2A;
-        }
-        .stButton button:hover {
-            background-color: #f5cb5c; /* Button hover background color */
-            color: #0d1b2a; /* Button hover text color */
-        }
-        .prediction-box {
-            font-size: 24px;
-            font-weight: bold;
-            text-align: center;
-            padding: 20px;
-            border-radius: 20px;
-            margin: 20px 0;
-        }
-        .not-offensive {
-            background-color: #c8e6c9;
-            color: #2e7d32;
-        }
-        .offensive {
-            background-color: #ffcdd2;
-            color: #b71c1c;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
-# Embed the logo in the HTML
-#VoltSight
-st.markdown(f"""
-    <div style="text-align: center;">
-        <h1>EV Analysis</h1>
-        <h4><i>Understand your EV market</i></h4>
-    </div>
-    """, unsafe_allow_html=True)
-st.write("")
-
-st.markdown("<p style='text-align: center;'>This app drives the electric revolution forward — forecasting EV sales, measuring public sentiment, and decoding real-world charging and usage patterns. A data-driven command center for identifying emerging trends and the next surge in electric mobility.</p>", unsafe_allow_html=True)
-st.write("")
+# --- Header and Intro ---
+st.markdown(f""" <div style="text-align: center; font-weight: bold;"> <h1>VoltSight</h1> <h4><i>Understand your EV market</i></h4> </div> """, unsafe_allow_html=True) 
+st.write("") 
+st.markdown("<p style='text-align: center;'>This app drives the electric revolution forward — forecasting EV sales, measuring public sentiment, and decoding real-world charging and usage patterns. A data-driven command center for identifying emerging trends and the next surge in electric mobility.</p>", unsafe_allow_html=True) 
+st.write("") 
 st.write("")
 
 cols = st.columns([1, 2, 1, 2, 1, 2, 1, 2, 1])
+
 
 # Place buttons in every other column
 with cols[1]:
@@ -158,7 +119,7 @@ if 'input_type' in st.session_state:
         #Actual Streamlit Code
         st.header('Sentiment Analysis and Forecasting')
         st.markdown(
-    "<p style='color: #9BAEC1;'>How did the sentiment vary so far? How's it going to change for the next week? We've got the analysis.</p>", 
+    "<p>How did the sentiment vary so far? How's it going to change for the next week? We've got the analysis.</p>", 
     unsafe_allow_html=True
 )
 
@@ -218,7 +179,7 @@ if 'input_type' in st.session_state:
 
         #graphs from plotly
         custom_colors = ['#00FFC6', '#0077B6',"#48CAE4", '#90E0EF', '#FFD166']
-        background_color = "#112235"
+        background_color = "#bef0e5"
         font_color = '#9BAEC1'  # or try '#e0e0e0' for softer look
 
     # Apply to line charts
@@ -231,7 +192,6 @@ if 'input_type' in st.session_state:
                 colorway=custom_colors
             )
             fig.update_xaxes(showgrid=True, gridcolor='gray')
-            fig.update_yaxes(showgrid=True, gridcolor='gray')
 
         # Apply to bar charts
         for fig in [fig_bar_sentiment, fig_buzz]:
@@ -241,7 +201,7 @@ if 'input_type' in st.session_state:
                 plot_bgcolor=background_color,
                 font=dict(color=font_color),
                 xaxis=dict(showgrid=False),
-                yaxis=dict(showgrid=True, gridcolor='gray')
+                yaxis=dict(showgrid=True, gridcolor='light blue')
             )
         
         c1_graph, c2_graph = st.columns(2)
@@ -249,7 +209,7 @@ if 'input_type' in st.session_state:
             st.subheader("Sentiment Momentum Comparison")
             st.plotly_chart(fig_momentum, use_container_width=True)
             st.markdown(
-    "<h6 style='text-align: center; color: #F5CB5C;'>Shows sentiment momentum over time for each brand.</h4>", 
+    "<h6 style='text-align: center; color: #a8872dff;'>Shows sentiment momentum over time for each brand.</h4>", 
     unsafe_allow_html=True
 )
         with c2_graph:
@@ -257,7 +217,7 @@ if 'input_type' in st.session_state:
             st.subheader("Sentiment Intensity Comparison")
             st.plotly_chart(fig_bar_sentiment, use_container_width=True)
             st.markdown(
-    "<h6 style='text-align: center; color: #F5CB5C;'>Compares overall sentiment intensity across brands.</h4>", 
+    "<h6 style='text-align: center; color: #a8872dff;'>Compares overall sentiment intensity across brands.</h4>", 
     unsafe_allow_html=True
 )
 
@@ -265,9 +225,9 @@ if 'input_type' in st.session_state:
         c1,c2 = st.columns([2,1])
         with c1:
             st.subheader("Brand-Level Analysis")
-            st.markdown("<p style='color: #9BAEC1;'>Our agent combines model results with sentiment trends for clear business insights.</p>", unsafe_allow_html=True)
+            st.markdown("<p>Our agent combines model results with sentiment trends for clear business insights.</p>", unsafe_allow_html=True)
             #UNCOMMENT TO RUN AGENT
-            progress = st.progress(0)
+            """progress = st.progress(0)
             insights = []
 
             for i, (_, row) in enumerate(brand_summary.iterrows()):
@@ -277,7 +237,7 @@ if 'input_type' in st.session_state:
             st.success("Analysis complete ✅")
             for insight in insights:
                 with st.expander(insight.split('\n')[0].strip('#').strip(), expanded=False):
-                    st.markdown(insight, unsafe_allow_html=False)
+                    st.markdown(insight, unsafe_allow_html=False)"""
         with c2:
             st.subheader("Model Metrics")
             st.metric(label="Accuracy", value=f"{accuracy.get():.2%}")
@@ -529,7 +489,7 @@ if 'input_type' in st.session_state:
         fig_sarimax.update_layout(
             title="Hybrid SARIMAX Forecast — Monthly Training, Quarterly Output (GDP as Exogenous)",
             xaxis_title="Date", yaxis_title="EV Registrations",
-            paper_bgcolor="#112235", plot_bgcolor="#112235", font=dict(color="#9BAEC1")
+            paper_bgcolor="#bef0e5", plot_bgcolor="#bef0e5", font=dict(color="#000000")
         )
         st.plotly_chart(fig_sarimax, use_container_width=True)
 
@@ -575,14 +535,14 @@ if 'input_type' in st.session_state:
             x='index', y='Energy_MWh', color='Category',
             title="Forecasted EV Energy Demand by Category (MWh, Quarterly)", markers=True
         )
-        fig_energy.update_layout(paper_bgcolor="#112235", plot_bgcolor="#112235", font=dict(color="#9BAEC1"))
+        fig_energy.update_layout(paper_bgcolor="#bef0e5", plot_bgcolor="#bef0e5", font=dict(color="#000000"))
         
         # Side-by-side layout for energy chart and formula
         c1_energy, c2_energy = st.columns([2, 1])
         with c1_energy:
             st.plotly_chart(fig_energy, use_container_width=True)
             st.markdown(
-                "<h6 style='text-align: center; color: #F5CB5C;'>Energy demand forecast broken down by vehicle category.</h6>", 
+                "<h6 style='text-align: center; color: #a8872dff;'>Energy demand forecast broken down by vehicle category.</h6>", 
                 unsafe_allow_html=True
             )
         
@@ -595,11 +555,11 @@ if 'input_type' in st.session_state:
             
             st.markdown("""
             <div style="
-                background-color:#0f1b33;
-                border: 1px solid #2e4057;
+                background-color:#E8F0EB;
+                border: 1px solid #E8F0EB;
                 border-radius: 10px;
                 padding: 15px;
-                color:#B8C6DB;
+                color:#0A0A0A;
                 font-size:14px;
                 line-height:1.8;">
             <b>Where:</b><br>
@@ -655,7 +615,7 @@ if 'input_type' in st.session_state:
             barmode="group",
             title="Top 5 States — Charging Stations (Actual & Predicted)"
         )
-        fig_st.update_layout(paper_bgcolor="#112235", plot_bgcolor="#112235", font=dict(color="#9BAEC1"))
+        fig_st.update_layout(paper_bgcolor="#bef0e5", plot_bgcolor="#bef0e5", font=dict(color="#000000"))
 
         # ==================== 5️⃣ NATIONAL INFRASTRUCTURE PREDICTIONS ====================
         # Calculate national totals
@@ -688,21 +648,21 @@ if 'input_type' in st.session_state:
             text='Stations'
         )
         fig_national.update_traces(texttemplate='%{text:,.0f}', textposition='outside')
-        fig_national.update_layout(paper_bgcolor="#112235", plot_bgcolor="#112235", font=dict(color="#9BAEC1"))
+        fig_national.update_layout(paper_bgcolor="#bef0e5", plot_bgcolor="#bef0e5", font=dict(color="#000000"))
         
         # Side-by-side layout for infrastructure charts
         c1_infra, c2_infra = st.columns(2)
         with c1_infra:
             st.plotly_chart(fig_st, use_container_width=True)
             st.markdown(
-                "<h6 style='text-align: center; color: #F5CB5C;'>State-wise infrastructure growth and predictions.</h6>", 
+                "<h6 style='text-align: center; color: #a8872dff;'>State-wise infrastructure growth and predictions.</h6>", 
                 unsafe_allow_html=True
             )
         
         with c2_infra:
             st.plotly_chart(fig_national, use_container_width=True)
             st.markdown(
-                "<h6 style='text-align: center; color: #F5CB5C;'>National-level charging station trends and forecasts.</h6>", 
+                "<h6 style='text-align: center; color: #a8872dff;'>National-level charging station trends and forecasts.</h6>", 
                 unsafe_allow_html=True
             )
 
@@ -779,9 +739,7 @@ if 'input_type' in st.session_state:
             xaxis_title="Quarter",
             yaxis_title="Energy (MWh)",
             barmode='group',
-            paper_bgcolor="#112235", 
-            plot_bgcolor="#112235", 
-            font=dict(color="#9BAEC1")
+            paper_bgcolor="#bef0e5", plot_bgcolor="#bef0e5", font=dict(color="#000000")
         )
         
         # Side-by-side layout for comparison chart and summary
@@ -789,7 +747,7 @@ if 'input_type' in st.session_state:
         with c1_adequacy:
             st.plotly_chart(fig_compare, use_container_width=True)
             st.markdown(
-                "<h6 style='text-align: center; color: #F5CB5C;'>Comparison of infrastructure capacity vs predicted energy demand.</h6>", 
+                "<h6 style='text-align: center; color: #a8872dff;'>Comparison of infrastructure capacity vs predicted energy demand.</h6>", 
                 unsafe_allow_html=True
             )
         
@@ -801,11 +759,11 @@ if 'input_type' in st.session_state:
 
             st.markdown(f"""
             <div style="
-                background-color:#0f1b33;
-                border: 1px solid #2e4057;
+                background-color:#E8F0EB;
+                border: 1px solid #E8F0EB;
                 border-radius: 10px;
                 padding: 20px;
-                color:#B8C6DB;
+                color:#0A0A0A;
                 font-size:15px;
                 line-height:1.8;">
             <b>📊 Adequacy Summary</b><br><br>
@@ -826,13 +784,13 @@ if 'input_type' in st.session_state:
             col_left, col_right = st.columns(2)
             from src.model.news import fetch_news_data
             #UNCOMMENT TO RUN AGENT 
-            news_summary = fetch_news_data()
+            """news_summary = fetch_news_data()
             half = len(news_summary) // 2
             with col_left:
                 st.header('On the Headlines')
                 st.markdown(news_summary[:half])
             with col_right:
-                st.markdown(news_summary[half:])
+                st.markdown(news_summary[half:])"""
 
         col_why, col_about = st.columns([2,1]) 
         with col_why:
@@ -854,8 +812,8 @@ if 'input_type' in st.session_state:
 st.markdown(" ")
 st.markdown(
     """
-    <div style="background-color: #00bfa6;
-            color: #000000; border: 1px solid #00bfa6; padding: 10px; border-radius: 20px;">
+    <div style="background-color: #E8F0EB;
+            color: #0A0A0A; border: 1px solid #E8F0EB; padding: 10px; border-radius: 20px;">
         <h6 style='text-align: center;'>Disclaimer</h6>
         <p style='text-align: center;'>
             This application is designed to analyse and forecast trends in the electric vehicle (EV) market using historical data and machine learning models.
@@ -869,4 +827,4 @@ st.markdown(
 st.markdown(" ")
 st.markdown(" ")
 st.markdown(" ")
-st.markdown("<p style='text-align: center; color: #ffffff;'>© 2025 EVAnalysis. All rights reserved.</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #000000;'>© 2025 VoltSight. All rights reserved.</p>", unsafe_allow_html=True)
