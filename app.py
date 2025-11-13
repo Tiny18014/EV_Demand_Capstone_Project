@@ -255,13 +255,81 @@ if 'input_type' in st.session_state:
             generate_on_demand_forecast,
             DATA_PATH
         )
+        from src.model.simulation_analysis import (
+        get_simulation_data, 
+        create_performance_graph, 
+        get_training_performance_summary,
+        calculate_metrics # Added for optional display of simulation metrics
+    )
 
         df_2025 = get_2025_data()
         classical_preds = run_classical_predictions(df_2025)
         classical_report = generate_agent_report(classical_preds, "Classical")
-        st.subheader("Model Metrics")
-        classical_preds.to_csv("src/data/cml_predictions.csv", index=False)
+        # --- Final Performance Section ---
+        st.markdown("---")
+        st.header("Final Model & Simulation Performance")
 
+        # Create the side-by-side layout
+        c1_graph, c2_metrics = st.columns([2, 1])
+
+        # --- Left Column: Simulation Graph ---
+        with c1_graph:
+            st.subheader("Simulation Performance Over Time")
+            st.markdown("This graph shows how the models performed in a day-by-day forecasting simulation, comparing predicted sales to the actual sales generated during the run.")
+
+            # IMPORTANT: DB_PATH is set to the confirmed location: src/model/
+            DB_PATH = "src/model/live_predictions.db" 
+            sim_df = get_simulation_data(DB_PATH)
+
+            if not sim_df.empty:
+                fig = create_performance_graph(sim_df)
+                st.plotly_chart(fig, use_container_width=True)
+                
+                # Display overall simulation metrics
+                sim_metrics = calculate_metrics(sim_df)
+                if sim_metrics:
+                    st.markdown(f"**Simulation Metrics:** R²: `{sim_metrics['r2']:.3f}` | MAE: `{sim_metrics['mae']:.2f}` | RMSE: `{sim_metrics['rmse']:.2f}`")
+
+                st.markdown(
+                    "<h6 style='text-align: center; color: #a8872dff;'>Actual vs. Predicted sales during the completed simulation.</h6>", 
+                    unsafe_allow_html=True
+                )
+            else:
+                st.warning(f"No simulation data found at `{DB_PATH}`. Please run the simulation pipeline.")
+
+        # --- Right Column: Formatted Training Metrics ---
+        with c2_metrics:
+            st.subheader("Model Performance on Test Data")
+            st.markdown("Metrics from the initial model training, showing performance on the original test set.")
+
+            # This uses the modified get_training_performance_summary()
+            training_summary_df = get_training_performance_summary() 
+
+            if not training_summary_df.empty:
+                # Build the HTML/Markdown string for the summary box
+                metrics_html = '<b>📊 Training Performance Summary</b><br><br>'
+                for index, row in training_summary_df.iterrows():
+                    metrics_html += f"• <b>{row['Vehicle Category']}:</b><br>"
+                    # Use formatted numbers for display
+                    r2_score_val = row['R² Score'] if pd.notna(row['R² Score']) else 0.0
+                    mae_val = row['MAE'] if pd.notna(row['MAE']) else 0.0
+                    metrics_html += f"  - R² Score: {r2_score_val:.3f}<br>"
+                    metrics_html += f"  - MAE: {mae_val:.2f}<br>"
+                
+                st.markdown(f"""
+                <div style="
+                    background-color:#E8F0EB;
+                    border: 1px solid #E8F0EB;
+                    border-radius: 10px;
+                    padding: 20px;
+                    color:#0A0A0A;
+                    font-size:14px;
+                    line-height:1.8;">
+                {metrics_html}
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.warning("Could not load training performance data. Check the `src/model` directory for model files.")
 
         st.subheader("On-Demand Regional Forecasts")
         col1, col2 = st.columns([3,3])
