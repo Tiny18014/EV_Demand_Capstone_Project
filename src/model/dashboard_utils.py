@@ -80,41 +80,41 @@ class DashboardAgent:
             - Tone: Executive, realistic, commercially relevant.
         """)
 
-        def invoke(self, model_type: str, data_summary: str):
-            """Builds prompt and queries the Hugging Face text-generation API."""
-            if not LLM_CLIENT:
-                raise RuntimeError("LLM client not initialized. Check your DF_AGENT secret or Hugging Face connection.")
+    def invoke(self, model_type: str, data_summary: str):
+        """Builds prompt and queries the Hugging Face text-generation API."""
+        if not LLM_CLIENT:
+            raise RuntimeError("LLM client not initialized. Check your DF_AGENT secret or Hugging Face connection.")
 
-            system_prompt = self.description
-            user_prompt = dedent(f"""
-                {self.instructions}
+        system_prompt = self.description
+        user_prompt = dedent(f"""
+            {self.instructions}
 
-                INPUT DATA (Model: {model_type}):
-                {data_summary}
+            INPUT DATA (Model: {model_type}):
+            {data_summary}
 
-                Now, generate the report following the OUTPUT STYLE.
-            """)
+            Now, generate the report following the OUTPUT STYLE.
+        """)
 
-            try:
-                full_prompt = f"{system_prompt}\n\n{user_prompt}"
+        try:
+            full_prompt = f"{system_prompt}\n\n{user_prompt}"
 
-                response = LLM_CLIENT.text_generation(
-                    prompt=full_prompt,
-                    max_new_tokens=512,
-                    temperature=0.25,
-                    stream=False,
-                )
+            response = LLM_CLIENT.text_generation(
+                prompt=full_prompt,
+                max_new_tokens=512,
+                temperature=0.25,
+                stream=False,
+            )
 
-                if isinstance(response, str):
-                    return response.strip()
+            if isinstance(response, str):
+                return response.strip()
 
-                if isinstance(response, dict) and "generated_text" in response:
-                    return response["generated_text"].strip()
+            if isinstance(response, dict) and "generated_text" in response:
+                return response["generated_text"].strip()
 
-                return f"⚠️ Unexpected response type: {type(response)}"
+            return f"⚠️ Unexpected response type: {type(response)}"
 
-            except Exception as e:
-                return f"### {model_type} Model Forecast Analysis (2025)\n\n⚠️ Agent Error: {e}"
+        except Exception as e:
+            return f"### {model_type} Model Forecast Analysis (2025)\n\n⚠️ Agent Error: {e}"
 
 
 
@@ -212,9 +212,10 @@ def generate_agent_report(predictions_df: pd.DataFrame, model_type: str) -> str:
 
     try:
         response = report_agent.invoke(model_type, data_summary)
+        
         report_text = dedent(f"""
             ### {model_type} Model Forecast Analysis (2025) 🤖
-            {response.choices[0].message.content}
+            {response}  # ✅ Use the returned string directly here
         """)
         return report_text.strip()
     except Exception as e:
