@@ -15,7 +15,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.linear_model import LinearRegression
 from src.model.predict import forecast_ev_sales
 from textwrap import dedent
-
+from src.model.agent_df import ev_forecast_analyst_agent
 
 
 
@@ -259,21 +259,14 @@ if 'input_type' in st.session_state:
         df_2025 = get_2025_data()
         classical_preds = run_classical_predictions(df_2025)
         classical_report = generate_agent_report(classical_preds, "Classical")
+        st.subheader("Model Metrics")
+        classical_preds.to_csv("src/data/cml_predictions.csv", index=False)
 
 
         st.subheader("On-Demand Regional Forecasts")
-        selected_category = st.selectbox("Select Vehicle Category", ["2-Wheelers", "3-Wheelers", "4-Wheelers"])
-        selected_state = st.selectbox("Select State/Region", ["Maharashtra", "Karnataka", "Tamil Nadu", "Delhi", "Gujarat"])
-        days_to_forecast = st.slider("Forecast Horizon (days)", 7, 60, 30)
-
-        forecast_df, forecast_fig = generate_on_demand_forecast(selected_category, selected_state, days_to_forecast)
-        print("DEBUG:", type(forecast_fig), forecast_fig)
-        
-        st.plotly_chart(forecast_fig, use_container_width=True)
-
-        col1, col2 = st.columns([3,2])
+        col1, col2 = st.columns([3,3])
         with col1:
-            st.markdown("QML Model Forecasts for EV Sales in 2025")
+            st.markdown("QML Model Quarterly Forecast")
             df = pd.read_csv("src/data/qmldata/jul_aug_sep.csv")
             forecast_df = forecast_ev_sales(year=2025, months=[9, 10, 11, 12])
 
@@ -283,7 +276,7 @@ if 'input_type' in st.session_state:
             })
             forecast_df["Type"] = "Forecast"
             df["Type"] = "Historical"
-
+            forecast_df.to_csv("src/data/quarter_forecast.csv", index=False)
             combined_df = pd.concat([df, forecast_df], ignore_index=True)
             combined_df = combined_df.sort_values(by="Month")
 
@@ -292,7 +285,8 @@ if 'input_type' in st.session_state:
 
             selected_vehicle = st.selectbox("Select Vehicle Category (optional)", ["All"] + vehicle_options)
             selected_state = st.selectbox("Select State EV Group (optional)", ["All"] + state_options)
-
+        
+            st.markdown("This model leverages advanced quantum machine learning techniques to capture complex patterns in EV sales data, providing robust forecasts across vehicle categories and state groups.")
             # --- Apply filters based on user choice ---
             filtered_df = combined_df.copy()
 
@@ -319,7 +313,7 @@ if 'input_type' in st.session_state:
                     color=color_col,
                     line_dash="Type",
                     markers=True,
-                    title="EV Sales Trend (Historical + Forecast)"
+                    title="Quarterly Sales Trend"
                 )
             else:
                 fig = px.line(
@@ -328,8 +322,8 @@ if 'input_type' in st.session_state:
                     y="Log_EV_Sales_Quantity",
                     line_dash="Type",
                     markers=True,
-                    title="EV Sales Trend (Historical + Forecast)",
-                    color_discrete_sequence=["#1f77b4"]
+                    title="Quarterly Sales Trend",
+                    color_discrete_sequence=["#087878"]
                 )
 
             # --- Layout polish ---
@@ -348,13 +342,27 @@ if 'input_type' in st.session_state:
                 lambda trace: trace.update(line=dict(dash="dash")) if "Forecast" in trace.name else None
             )
 
-            # --- Display ---
             st.plotly_chart(fig, use_container_width=True)
+            quantum_json = forecast_df.to_json(orient="records")
+            response_quantum = ev_forecast_analyst_agent.run(f"Quantum Dataframe Analysis for this dataframe: {quantum_json}")
+            st.markdown(response_quantum.content, unsafe_allow_html=False)
 
-            st.markdown("Classical Model Forecasts for EV Sales in 2025")
+
+            
         with col2:
-            st.markdown("Agent")
-            st.markdown(classical_report)
+            st.markdown("Classical Model Monthly Forecast")
+            selected_category = st.selectbox("Select Vehicle Category", ["2-Wheelers", "3-Wheelers", "4-Wheelers"])
+            selected_state = st.selectbox("Select State/Region", ["Maharashtra", "Karnataka", "Tamil Nadu", "Delhi", "Gujarat"])
+            days_to_forecast = st.slider("Forecast Horizon (days)", 7, 60, 30)
+
+            forecast_df, forecast_fig = generate_on_demand_forecast(selected_category, selected_state, days_to_forecast)
+            print("DEBUG:", type(forecast_fig), forecast_fig)
+            
+            st.plotly_chart(forecast_fig, use_container_width=True)
+            classical_json = classical_preds.to_json(orient="records")
+            response_classical = ev_forecast_analyst_agent.run(f"Classical Dataframe Analysis for this dataframe: {classical_json}")
+            st.markdown(response_classical.content, unsafe_allow_html=False)
+            
 
             
 
