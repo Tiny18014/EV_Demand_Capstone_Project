@@ -212,9 +212,10 @@ def generate_agent_report(predictions_df: pd.DataFrame, model_type: str) -> str:
 
     try:
         response = report_agent.invoke(model_type, data_summary)
+        
         report_text = dedent(f"""
             ### {model_type} Model Forecast Analysis (2025) 🤖
-            {response.choices[0].message.content}
+            {response}  # ✅ Use the returned string directly here
         """)
         return report_text.strip()
     except Exception as e:
