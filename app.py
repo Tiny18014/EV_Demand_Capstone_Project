@@ -91,10 +91,18 @@ if 'input_type' in st.session_state:
             x="brand_name",
             y="avg_sentiment",
             color="sentiment_type",
-            barmode="group"
+            barmode="group",
+            labels={
+                "brand_name": "Brand",
+                "avg_sentiment": "Average Sentiment Score",
+                "sentiment_type": "Sentiment"
+            }
         )
 
-        fig_buzz = px.bar(buzz_scores, x="brand_encoded", y="buzz_score", title="Buzz Score per Brand")
+        fig_buzz = px.bar(buzz_scores, x="brand_encoded", y="buzz_score", title="Buzz Score per Brand",     labels={
+        "brand_encoded": "Brand",
+        "buzz_score": "Buzz Score"
+    })
         fig_buzz.update_xaxes(tickvals=list(brand_decoder.keys()), ticktext=list(brand_decoder.values()))
         agg_funcs = {
         'vader_compound': 'mean',
@@ -412,10 +420,6 @@ if 'input_type' in st.session_state:
 
             st.plotly_chart(fig, use_container_width=True)
             quantum_json = forecast_df.to_json(orient="records")
-            response_quantum = ev_forecast_analyst_agent.run(f"Quantum Dataframe Analysis for this dataframe: {quantum_json}")
-            st.markdown(response_quantum.content, unsafe_allow_html=False)
-
-
             
         with col2:
             st.markdown("Classical Model Monthly Forecast")
@@ -428,8 +432,18 @@ if 'input_type' in st.session_state:
             
             st.plotly_chart(forecast_fig, use_container_width=True)
             classical_json = classical_preds.to_json(orient="records")
+
+
+        col3, col4 = st.columns([3,3])
+        st.subheader("Tech to Business Angle - Our Agent, Your Forecast")
+        with col3:
+            response_quantum = ev_forecast_analyst_agent.run(f"Quantum Dataframe Analysis for this dataframe: {quantum_json}")
+            with st.expander("Quarterly Forecast by the Quantum Model", expanded=False):
+                st.markdown(response_quantum.content, unsafe_allow_html=False)
+        with col4:
             response_classical = ev_forecast_analyst_agent.run(f"Classical Dataframe Analysis for this dataframe: {classical_json}")
-            st.markdown(response_classical.content, unsafe_allow_html=False)
+            with st.expander("Custom Forecast by the Classical Model", expanded=False):            
+                st.markdown(response_classical.content, unsafe_allow_html=False)
             
 
             
