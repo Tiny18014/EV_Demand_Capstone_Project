@@ -6,7 +6,7 @@ fileWatcherType = "none"
 base = "light"
 primaryColor = "#00A6A6"
 backgroundColor = "#bef0e5ff"
-secondaryBackgroundColor = "#E9EFF3"
+secondaryBackgroundColor = "#8ec4e7ff"
 textColor = "#0A0A0A"
 
 # Widgets

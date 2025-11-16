@@ -26,10 +26,27 @@ st.set_page_config(
 )
 
 # --- Header and Intro ---
+
 st.markdown(f""" <div style="text-align: center; font-weight: bold;"> <h1>EVolution India</h1> <h4><i>Understand your EV market</i></h4> </div> """, unsafe_allow_html=True) 
 st.write("") 
 st.markdown("<p style='text-align: center;'>This app drives the electric revolution forward — forecasting EV sales, measuring public sentiment, and decoding real-world charging and usage patterns. A data-driven command center for identifying emerging trends and the next surge in electric mobility.</p>", unsafe_allow_html=True) 
 st.write("") 
+col1, col2, col3 = st.columns([2, 2, 2])
+ev_count = 7.02e6  # 7.02 million
+charging_stations = 29277
+co2_saved = 10e6  # 10 million tonnes
+with col1:
+    st.metric(label="Registered EVs in India", value=f"{ev_count:,.0f}", border=True)
+    st.write("")
+with col2:
+    st.metric(label="EV Charging Stations in India", value=f"{charging_stations:,}", border=True)
+    st.write("")
+with col3:
+    st.metric(label="Estimated CO₂ Avoided (million tonnes)", value=f"{co2_saved/1e6:.2f}", border=True)
+    st.write("")
+st.markdown("<p style='text-align: center;'>Leveraging advanced online models, hybrid quantum-classical forecasts and agentic AI transforming technical output to business insights, this dashboard provides a comprehensive overview into the current EV demand through factors like sales, sentiment and charging behavior.</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center;'><b>Cognitions</b> analyses and forecasts market sentiment of the leading EV brands in India, while <b>Projections</b> derives insights from sales data. <b>Dynamics</b> focuses on up to date analysis of charging behavior and energy consumption patterns. <b>Synopsis</b> tab provides an overview of the project and its objectives.</p>", unsafe_allow_html=True)
+
 st.write("")
 
 cols = st.columns([1, 2, 1, 2, 1, 2, 1, 2, 1])
@@ -238,14 +255,14 @@ if 'input_type' in st.session_state:
             progress = st.progress(0)
             insights = []
 
-            for i, (_, row) in enumerate(brand_summary.iterrows()):
+            """for i, (_, row) in enumerate(brand_summary.iterrows()):
                 result = tech_to_business_agent.run(str(row.to_dict()))
                 insights.append(result.content)
                 progress.progress((i + 1) / len(brand_summary))
             st.success("Analysis complete ✅")
             for insight in insights:
                 with st.expander(insight.split('\n')[0].strip('#').strip(), expanded=False):
-                    st.markdown(insight, unsafe_allow_html=False)
+                    st.markdown(insight, unsafe_allow_html=False)"""
         with c2:
             st.subheader("Model Metrics")
             st.metric(label="Accuracy", value=f"{accuracy.get():.2%}")
@@ -413,7 +430,6 @@ if 'input_type' in st.session_state:
             )
             fig.update_traces(line=dict(width=3))
 
-            # Distinguish forecast visually (dashed line)
             fig.for_each_trace(
                 lambda trace: trace.update(line=dict(dash="dash")) if "Forecast" in trace.name else None
             )
@@ -433,19 +449,16 @@ if 'input_type' in st.session_state:
             st.plotly_chart(forecast_fig, use_container_width=True)
             classical_json = classical_preds.to_json(orient="records")
 
-
+        """st.subheader("Tech to Business Angle - Our Agent, Your Forecast")
         col3, col4 = st.columns([3,3])
-        st.subheader("Tech to Business Angle - Our Agent, Your Forecast")
         with col3:
             response_quantum = ev_forecast_analyst_agent.run(f"Quantum Dataframe Analysis for this dataframe: {quantum_json}")
             with st.expander("Quarterly Forecast by the Quantum Model", expanded=False):
                 st.markdown(response_quantum.content, unsafe_allow_html=False)
         with col4:
             response_classical = ev_forecast_analyst_agent.run(f"Classical Dataframe Analysis for this dataframe: {classical_json}")
-            with st.expander("Custom Forecast by the Classical Model", expanded=False):            
-                st.markdown(response_classical.content, unsafe_allow_html=False)
-            
-
+            with st.expander(f"{days_to_forecast} Day Forecast by the Classical Model", expanded=False):            
+                st.markdown(response_classical.content, unsafe_allow_html=False)"""
             
 
     elif st.session_state.input_type == "charge":
@@ -870,7 +883,7 @@ if 'input_type' in st.session_state:
     elif st.session_state.input_type == "about":
         news_container = st.container(border=True)
          # Fetch and display news summary
-        with news_container:
+        """with news_container:
             col_left, col_right = st.columns(2)
             from src.model.news import fetch_news_data
             #UNCOMMENT TO RUN AGENT 
@@ -880,7 +893,7 @@ if 'input_type' in st.session_state:
                 st.header('On the Headlines')
                 st.markdown(news_summary[:half])
             with col_right:
-                st.markdown(news_summary[half:])
+                st.markdown(news_summary[half:])"""
 
         col_why, col_about = st.columns([2,1]) 
         with col_why:
