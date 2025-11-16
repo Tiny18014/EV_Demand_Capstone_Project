@@ -183,6 +183,12 @@ if 'input_type' in st.session_state:
                 else:
                     name = "TVS Motors"
                     data = tvsl
+                
+                if len(x_brand) < 2:
+                        # your fallback strategy: skip or produce default predictions
+                    print(f"Skipping {name}: only {len(x_brand)} row(s) available.")
+                    continue
+
                 last_xi = x_brand.iloc[-1].to_dict()
                 y_pred = model.predict_one(last_xi)
 
