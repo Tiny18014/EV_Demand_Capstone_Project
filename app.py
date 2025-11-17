@@ -16,6 +16,7 @@ from sklearn.linear_model import LinearRegression
 from src.model.predict import forecast_ev_sales
 from textwrap import dedent
 from src.model.agent_df import ev_forecast_analyst_agent
+from src.model.pestel_agent import pestel_classifier
 
 
 
@@ -26,28 +27,75 @@ st.set_page_config(
 )
 
 # --- Header and Intro ---
+hero1, hero2 = st.columns([3,2])
+with hero1:
+    st.markdown(f""" <div style="text-align: center; font-weight: bold;"> <h1>EVolution India</h1> <h4><i>Understand your EV market</i></h4> </div> """, unsafe_allow_html=True) 
+    st.write("") 
+    st.markdown("<p style='text-align: center;'>This app drives the electric revolution forward — forecasting EV sales, measuring public sentiment, and decoding real-world charging and usage patterns. A data-driven command center for identifying emerging trends and the next surge in electric mobility.</p>", unsafe_allow_html=True) 
+    st.write("") 
+    col1, col2, col3 = st.columns([2, 2, 2])
+    ev_count = 7.02e6  # 7.02 million
+    charging_stations = 29277
+    co2_saved = 10e6  # 10 million tonnes
+    with col1:
+        st.metric(label="Registered EVs in India", value=f"{ev_count:,.0f}", border=True)
+        st.write("")
+    with col2:
+        st.metric(label="EV Charging Stations", value=f"{charging_stations:,}", border=True)
+        st.write("")
+    with col3:
+        st.metric(label="Estimated CO₂ Avoided", value=f"{co2_saved/1e6:.2f}", border=True)
+        st.write("")
+    st.markdown("<p style='text-align: center;'>Leveraging advanced online models, hybrid quantum-classical forecasts and agentic AI transforming technical output to business insights, this dashboard provides a comprehensive overview into the current EV demand through factors like sales, sentiment and charging behavior.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center;'><b>Cognitions</b> analyses and forecasts market sentiment of the leading EV brands in India, while <b>Projections</b> derives insights from sales data. <b>Dynamics</b> focuses on up to date analysis of charging behavior and energy consumption patterns. <b>Synopsis</b> tab provides an overview of the project and its objectives.</p>", unsafe_allow_html=True)
 
-st.markdown(f""" <div style="text-align: center; font-weight: bold;"> <h1>EVolution India</h1> <h4><i>Understand your EV market</i></h4> </div> """, unsafe_allow_html=True) 
-st.write("") 
-st.markdown("<p style='text-align: center;'>This app drives the electric revolution forward — forecasting EV sales, measuring public sentiment, and decoding real-world charging and usage patterns. A data-driven command center for identifying emerging trends and the next surge in electric mobility.</p>", unsafe_allow_html=True) 
-st.write("") 
-col1, col2, col3 = st.columns([2, 2, 2])
-ev_count = 7.02e6  # 7.02 million
-charging_stations = 29277
-co2_saved = 10e6  # 10 million tonnes
-with col1:
-    st.metric(label="Registered EVs in India", value=f"{ev_count:,.0f}", border=True)
     st.write("")
-with col2:
-    st.metric(label="EV Charging Stations in India", value=f"{charging_stations:,}", border=True)
-    st.write("")
-with col3:
-    st.metric(label="Estimated CO₂ Avoided (million tonnes)", value=f"{co2_saved/1e6:.2f}", border=True)
-    st.write("")
-st.markdown("<p style='text-align: center;'>Leveraging advanced online models, hybrid quantum-classical forecasts and agentic AI transforming technical output to business insights, this dashboard provides a comprehensive overview into the current EV demand through factors like sales, sentiment and charging behavior.</p>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center;'><b>Cognitions</b> analyses and forecasts market sentiment of the leading EV brands in India, while <b>Projections</b> derives insights from sales data. <b>Dynamics</b> focuses on up to date analysis of charging behavior and energy consumption patterns. <b>Synopsis</b> tab provides an overview of the project and its objectives.</p>", unsafe_allow_html=True)
+import json
+with hero2:
+    st.markdown("PESTEL chart goes here")
 
-st.write("")
+    # Call your backend function to get live PESTEL JSON
+    pestel_json_str = pestel_classifier()  # returns string
+    print(pestel_json_str)
+    data = json.loads(pestel_json_str)
+    print(data)
+    print(type(data))
+
+    # Now pestel_json is a dict
+    p_scores = {}
+    sub_scores = {}
+
+    for factor, subs in data.items():
+        total = sum(subs.values())
+        p_scores[factor] = total
+        sub_scores[factor] = subs
+
+    # --- create sunburst as before ---
+    labels = []
+    parents = []
+    values = []
+
+    labels.append("PESTEL Factors")
+    parents.append("")
+    values.append(sum(p_scores.values()))
+
+    for factor, total_value in p_scores.items():
+        labels.append(factor)
+        parents.append("PESTEL Factors")
+        values.append(total_value)
+        for subfactor, subvalue in sub_scores[factor].items():
+            labels.append(subfactor)
+            parents.append(factor)
+            values.append(subvalue)
+
+    fig = go.Figure(go.Sunburst(
+        labels=labels,
+        parents=parents,
+        values=values,
+        branchvalues="total",
+    ))
+    fig.update_layout(margin=dict(t=0, l=0, r=0, b=0))
+    st.plotly_chart(fig, use_container_width=True)
 
 cols = st.columns([1, 2, 1, 2, 1, 2, 1, 2, 1])
 
