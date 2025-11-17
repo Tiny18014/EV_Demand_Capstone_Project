@@ -4,9 +4,9 @@ fileWatcherType = "none"
 [theme]
 # General color setup
 base = "light"
-primaryColor = "#00A6A6"
+primaryColor = "#40d8d8ff"
 backgroundColor = "#bef0e5ff"
-secondaryBackgroundColor = "#8ec4e7ff"
+secondaryBackgroundColor = "#8bb4d0ff"
 textColor = "#0A0A0A"
 
 # Widgets

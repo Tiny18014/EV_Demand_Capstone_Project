@@ -33,29 +33,15 @@ with hero1:
     st.write("") 
     st.markdown("<p style='text-align: center;'>This app drives the electric revolution forward — forecasting EV sales, measuring public sentiment, and decoding real-world charging and usage patterns. A data-driven command center for identifying emerging trends and the next surge in electric mobility.</p>", unsafe_allow_html=True) 
     st.write("") 
-    col1, col2, col3 = st.columns([2, 2, 2])
-    ev_count = 7.02e6  # 7.02 million
-    charging_stations = 29277
-    co2_saved = 10e6  # 10 million tonnes
-    with col1:
-        st.metric(label="Registered EVs in India", value=f"{ev_count:,.0f}", border=True)
-        st.write("")
-    with col2:
-        st.metric(label="EV Charging Stations", value=f"{charging_stations:,}", border=True)
-        st.write("")
-    with col3:
-        st.metric(label="Estimated CO₂ Avoided", value=f"{co2_saved/1e6:.2f}", border=True)
-        st.write("")
+    
     st.markdown("<p style='text-align: center;'>Leveraging advanced online models, hybrid quantum-classical forecasts and agentic AI transforming technical output to business insights, this dashboard provides a comprehensive overview into the current EV demand through factors like sales, sentiment and charging behavior.</p>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center;'><b>Cognitions</b> analyses and forecasts market sentiment of the leading EV brands in India, while <b>Projections</b> derives insights from sales data. <b>Dynamics</b> focuses on up to date analysis of charging behavior and energy consumption patterns. <b>Synopsis</b> tab provides an overview of the project and its objectives.</p>", unsafe_allow_html=True)
+    #st.markdown("<p style='text-align: center;'><b>Cognitions</b> analyses and forecasts market sentiment of the leading EV brands in India, while <b>Projections</b> derives insights from sales data. <b>Dynamics</b> focuses on up to date analysis of charging behavior and energy consumption patterns. <b>Synopsis</b> tab provides an overview of the project and its objectives.</p>", unsafe_allow_html=True)
 
     st.write("")
 import json
 with hero2:
-    """st.markdown("PESTEL chart goes here")
-
     # Call your backend function to get live PESTEL JSON
-    pestel_json_str = pestel_classifier()  # returns string
+    """pestel_json_str = pestel_classifier()  # returns string
     print(pestel_json_str)
     data = json.loads(pestel_json_str)
     print(data)
@@ -75,13 +61,13 @@ with hero2:
     parents = []
     values = []
 
-    labels.append("PESTEL Factors")
+    labels.append("Demand Factors")
     parents.append("")
     values.append(sum(p_scores.values()))
 
     for factor, total_value in p_scores.items():
         labels.append(factor)
-        parents.append("PESTEL Factors")
+        parents.append("Demand Factors")
         values.append(total_value)
         for subfactor, subvalue in sub_scores[factor].items():
             labels.append(subfactor)
@@ -949,10 +935,28 @@ if 'input_type' in st.session_state:
             with col_right:
                 st.markdown(news_summary[half:])"""
 
-        col_why, col_about = st.columns([2,1]) 
+        col_why, col_about = st.columns([2,1], gap="small") 
         with col_why:
             st.header('Why electric vehicles?')
             st.markdown("In 2025, the world stands at the crossroads of innovation and sustainability, and electric vehicles are at the heart of this transformation. Our project explores the evolving landscape of EV technology—where clean energy, intelligent systems, and advanced engineering converge to redefine mobility. By focusing on electric vehicles, we aim to contribute to a future that is not only more efficient and connected but also environmentally responsible, aligning technological progress with global sustainability goals.")
+            ev_count = 7.02e6  # 7.02 million
+            charging_stations = 29277
+            co2_saved = 10e6  # 10 million tonnes
+            ss = st.container(border=True)
+            with ss:
+                col1, col2, col3 = st.columns([2, 2, 2])
+                with col1:
+                    st.metric(label="Registered EVs in India", value=f"{ev_count:,.0f}")
+                    st.markdown("<p style='font-size: 12px;'>(2025)</p>", unsafe_allow_html=True)
+                    st.write("")
+                with col2:
+                    st.metric(label="EV Charging Stations", value=f"{charging_stations:,}")
+                    st.markdown("<p style='font-size: 12px;'>(2025)</p>", unsafe_allow_html=True)
+                    st.write("")
+                with col3:
+                    st.metric(label="Estimated CO₂ Avoided", value=f"{co2_saved/1e6:.2f}")
+                    st.markdown("<p style='font-size: 12px;'>(in tonnes)</p>", unsafe_allow_html=True)
+                    st.write("")
         with col_about:
             st.header('About the App')
             st.markdown("This application is developed as part of our Capstone project, and has the following functionalities: ")
@@ -967,10 +971,12 @@ if 'input_type' in st.session_state:
 
 #disclaimer and footer
 st.markdown(" ")
+st.markdown(" ")
+st.markdown(" ")
 st.markdown(
     """
     <div style="background-color: #E8F0EB;
-            color: #0A0A0A; border: 1px solid #E8F0EB; padding: 10px; border-radius: 20px;">
+            color: #0A0A0A; border: 1px solid #E8F0EB; padding: 5px; border-radius: 20px;">
         <h6 style='text-align: center;'>Disclaimer</h6>
         <p style='text-align: center;'>
             This application is designed to analyse and forecast trends in the electric vehicle (EV) market using historical data and machine learning models.
@@ -981,7 +987,5 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.markdown(" ")
-st.markdown(" ")
 st.markdown(" ")
 st.markdown("<p style='text-align: center; color: #000000;'>© 2025 EVolutionIndia. All rights reserved.</p>", unsafe_allow_html=True)
