@@ -52,7 +52,7 @@ with hero1:
     st.write("")
 import json
 with hero2:
-    st.markdown("PESTEL chart goes here")
+    """st.markdown("PESTEL chart goes here")
 
     # Call your backend function to get live PESTEL JSON
     pestel_json_str = pestel_classifier()  # returns string
@@ -95,7 +95,7 @@ with hero2:
         branchvalues="total",
     ))
     fig.update_layout(margin=dict(t=0, l=0, r=0, b=0))
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True)"""
 
 cols = st.columns([1, 2, 1, 2, 1, 2, 1, 2, 1])
 
