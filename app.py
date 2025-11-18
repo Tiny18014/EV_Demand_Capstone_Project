@@ -1,22 +1,22 @@
 from datetime import datetime, timedelta
 import pickle
-from river import metrics
-from src.data.preprocess import preprocess  
-import pandas as pd
-import streamlit as st
-import plotly.express as px
-import plotly.graph_objects as go
-from src.model.agent_sentiment import tech_to_business_agent
-from src.model.agent_charging import charging_intelligence_agent
-from src.data.stockcharge import get_ev_demand_analysis
 import numpy as np
+from river import metrics
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.linear_model import LinearRegression
+from src.data.preprocess import preprocess  
+import streamlit as st
+import pandas as pd 
+from src.model.agent_sentiment import tech_to_business_agent
+from src.model.agent_charging import charging_intelligence_agent
+from src.data.stockcharge import get_ev_demand_analysis
 from src.model.predict import forecast_ev_sales
 from textwrap import dedent
 from src.model.agent_df import ev_forecast_analyst_agent
 from src.model.pestel_agent import pestel_classifier
+import plotly.express as px
+import plotly.graph_objects as go
 
 
 
@@ -33,21 +33,21 @@ with hero1:
     st.write("") 
     st.markdown("<p style='text-align: center;'>This app drives the electric revolution forward — forecasting EV sales, measuring public sentiment, and decoding real-world charging and usage patterns. A data-driven command center for identifying emerging trends and the next surge in electric mobility.</p>", unsafe_allow_html=True) 
     st.write("") 
-    
-    st.markdown("<p style='text-align: center;'>Leveraging advanced online models, hybrid quantum-classical forecasts and agentic AI transforming technical output to business insights, this dashboard provides a comprehensive overview into the current EV demand through factors like sales, sentiment and charging behavior.</p>", unsafe_allow_html=True)
-    #st.markdown("<p style='text-align: center;'><b>Cognitions</b> analyses and forecasts market sentiment of the leading EV brands in India, while <b>Projections</b> derives insights from sales data. <b>Dynamics</b> focuses on up to date analysis of charging behavior and energy consumption patterns. <b>Synopsis</b> tab provides an overview of the project and its objectives.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center;'><b>Cognitions</b> analyses and forecasts market sentiment of the leading EV brands in India, while <b>Projections</b> derives insights from sales data. <b>Dynamics</b> focuses on up to date analysis of charging behavior and energy consumption patterns. <b>Synopsis</b> tab provides an overview of the project and its objectives.</p>", unsafe_allow_html=True)
 
     st.write("")
 import json
 with hero2:
     # Call your backend function to get live PESTEL JSON
-    """pestel_json_str = pestel_classifier()  # returns string
-    print(pestel_json_str)
+    #pestel_json_str = pestel_classifier()  # returns string
+    #print(pestel_json_str)
+    with open("pestel_output.txt", "r") as f:
+        pestel_json_str = f.read()
     data = json.loads(pestel_json_str)
     print(data)
     print(type(data))
 
-    # Now pestel_json is a dict
+
     p_scores = {}
     sub_scores = {}
 
@@ -74,14 +74,37 @@ with hero2:
             parents.append(factor)
             values.append(subvalue)
 
+
+    colors = [
+        # ultra light mint
+        "#BEF0E5",  # pale aqua
+    "#A3E4D7",  # light greenish mint
+    "#8CDCD2",  # pale seafoam
+    "#6FD9C0",  # soft mint aqua
+    "#5FBCCB",  # brighter aqua pop
+    "#40D8D8",  # primary teal
+    "#5CA7A7",  # desaturated teal
+    "#4F8F8F",  # teal-gray
+    "#8BB4D0",  # soft blue-teal
+    "#7CA9C6",  # muted steel blue
+    "#96C8DC",  # airy ice blue
+    "#87BAE0",  # soft sky blue
+    "#314158",  # deep slate
+    "#2E3D4C"   # deeper slate anchor
+    ]
+
+   # your borderColor — deep slate anchor
+
+
     fig = go.Figure(go.Sunburst(
         labels=labels,
         parents=parents,
         values=values,
         branchvalues="total",
+        marker=dict(colors=colors)
     ))
     fig.update_layout(margin=dict(t=0, l=0, r=0, b=0))
-    st.plotly_chart(fig, use_container_width=True)"""
+    st.plotly_chart(fig, use_container_width=True)
 
 cols = st.columns([1, 2, 1, 2, 1, 2, 1, 2, 1])
 
@@ -181,6 +204,7 @@ if 'input_type' in st.session_state:
     "<p>How did the sentiment vary so far? How's it going to change for the next week? We've got the analysis.</p>", 
     unsafe_allow_html=True
 )
+        st.markdown("<p>Understand tomorrow's forecast based on the previous week through online learning. Arrow direction signals direction of forecast, while the brand specific graphs show sentiment performance over the week.</p>", unsafe_allow_html=True)
 
         from river import metrics  # Overall class-wise performance
         accuracy = metrics.Accuracy()
@@ -289,7 +313,7 @@ if 'input_type' in st.session_state:
         #agent and model metrics
         c1,c2 = st.columns([2,1])
         with c1:
-            st.subheader("Brand-Level Analysis")
+            st.subheader("Tech to Business Angle - Brand Specific Insights")
             st.markdown("<p>Our agent combines model results with sentiment trends for clear business insights.</p>", unsafe_allow_html=True)
             #UNCOMMENT TO RUN AGENT
             progress = st.progress(0)
@@ -489,7 +513,7 @@ if 'input_type' in st.session_state:
             st.plotly_chart(forecast_fig, use_container_width=True)
             classical_json = classical_preds.to_json(orient="records")
 
-        """st.subheader("Tech to Business Angle - Our Agent, Your Forecast")
+        """st.subheader("Tech to Business Angle - Sales against the Timeline")
         col3, col4 = st.columns([3,3])
         with col3:
             response_quantum = ev_forecast_analyst_agent.run(f"Quantum Dataframe Analysis for this dataframe: {quantum_json}")
@@ -500,7 +524,6 @@ if 'input_type' in st.session_state:
             with st.expander(f"{days_to_forecast} Day Forecast by the Classical Model", expanded=False):            
                 st.markdown(response_classical.content, unsafe_allow_html=False)"""
             
-
     elif st.session_state.input_type == "charge":
         st.header('Charging Behavior and Energy Consumption Analysis')
         # ==================== LOAD DATA ====================
@@ -944,7 +967,7 @@ if 'input_type' in st.session_state:
             co2_saved = 10e6  # 10 million tonnes
             ss = st.container(border=True)
             with ss:
-                col1, col2, col3 = st.columns([2, 2, 2])
+                col1, col2, col3 = st.columns([1, 1, 1])
                 with col1:
                     st.metric(label="Registered EVs in India", value=f"{ev_count:,.0f}")
                     st.markdown("<p style='font-size: 12px;'>(2025)</p>", unsafe_allow_html=True)
@@ -957,6 +980,8 @@ if 'input_type' in st.session_state:
                     st.metric(label="Estimated CO₂ Avoided", value=f"{co2_saved/1e6:.2f}")
                     st.markdown("<p style='font-size: 12px;'>(in tonnes)</p>", unsafe_allow_html=True)
                     st.write("")
+            st.markdown("Leveraging advanced online models, hybrid quantum-classical forecasts and agentic AI transforming technical output to business insights, this dashboard provides a comprehensive overview into the current EV demand through factors like sales, sentiment and charging behavior. It further approaches the business domain with a well rounded dynamic PESTEL analysis, identifying the various demand drivers of the EV domain, along with the extent of contribution of each factor.", unsafe_allow_html=True)
+            st.markdown("")
         with col_about:
             st.header('About the App')
             st.markdown("This application is developed as part of our Capstone project, and has the following functionalities: ")
@@ -964,8 +989,10 @@ if 'input_type' in st.session_state:
             - **Sentiment Analysis and Forecasting**: Analyze public sentiment towards various EV brands and forecast future sentiment trends to help brands understand market perception.
             - **Sales Forecasting**: Predict future sales of electric vehicles based on historical sales data, market trends, and external factors.
             - **Charging Behavior and Energy Consumption Analysis**: Examine how EV users charge their vehicles and their energy consumption patterns to optimize charging infrastructure and energy management.
+            - **PESTEL Analysis for EV Demand Drivers**: Evaluate the Political, Economic, Social, Technological, Environmental, and Legal factors influencing the demand for electric vehicles in India.
+            - **Agentic AI**: As an intermediary for every functionality, our agents translate numbers to insights and decisions.
             """)    
-            st.caption("Developed by Atharva, Shubham and Stuthi | Capstone 2025")
+            st.caption("Atharva Sreekar, Shubham Mahanti, Stuthi Shrisha | Capstone 2025")
 
 
 

@@ -73,7 +73,7 @@ def pestel_classifier():
           "Political": {{
             "Subsidies": 0.0,
             "Charging Policy": 0.0,
-            "Import Duties": 0.0
+            "Tariffs": 0.0
           }},
           "Economic": {{
             "EV Prices": 0.0,

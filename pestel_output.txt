@@ -1,0 +1,31 @@
+{
+  "Political": {
+    "Subsidies": 1.0,
+    "Charging Policy": 0.5,
+    "Tariffs": 0.2
+  },
+  "Economic": {
+    "EV Prices": 0.9,
+    "Battery Costs": 0.8,
+    "Interest Rates": 0.3
+  },
+  "Social": {
+    "Public Sentiment": 0.8,
+    "Adoption Narratives": 0.7
+  },
+  "Technological": {
+    "Charging Tech": 0.9,
+    "Battery Innovation": 0.8,
+    "Manufacturing Tech": 0.4
+  },
+  "Environmental": {
+    "Emission Norms": 0.7,
+    "Climate Targets": 0.9,
+    "Sustainability Pressure": 0.6
+  },
+  "Legal": {
+    "Compliance Mandates": 0.8,
+    "Safety Regulations": 0.7,
+    "Fleet Rules": 0.5
+  }
+}
