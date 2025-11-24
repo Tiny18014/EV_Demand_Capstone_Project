@@ -319,14 +319,14 @@ if 'input_type' in st.session_state:
             progress = st.progress(0)
             insights = []
 
-            """for i, (_, row) in enumerate(brand_summary.iterrows()):
+            for i, (_, row) in enumerate(brand_summary.iterrows()):
                 result = tech_to_business_agent.run(str(row.to_dict()))
                 insights.append(result.content)
                 progress.progress((i + 1) / len(brand_summary))
             st.success("Analysis complete ✅")
             for insight in insights:
                 with st.expander(insight.split('\n')[0].strip('#').strip(), expanded=False):
-                    st.markdown(insight, unsafe_allow_html=False)"""
+                    st.markdown(insight, unsafe_allow_html=False)
         with c2:
             st.subheader("Model Metrics")
             st.metric(label="Accuracy", value=f"{accuracy.get():.2%}")
