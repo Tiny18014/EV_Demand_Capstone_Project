@@ -118,13 +118,13 @@ if __name__ == "__main__":
     features_to_use = ['Vehicle_Class', 'State_EV_Group', 'Year',
                       'Vehicle_Category','month_sin', 'month_cos']
 
-    X = scaler.fit_transform(df[features_to_use])
+    X = scaler.transform(df[features_to_use])
     df['Date'] = pd.to_datetime(df['Date'])
     df['Log_EV_Sales_Quantity'] = np.log1p(df['EV_Sales_Quantity'])
     df["Days_Since_Start"] = (df["Date"] - pd.to_datetime("2014-01-01")).dt.days
     print(df["Days_Since_Start"])
     sscaler = joblib.load("src/model/standardscaler.joblib")
-    df[['Year_scaled', 'Month_scaled', 'month_sin', 'month_cos', 'Days_Since_Start']] = sscaler.fit_transform(df[['Year', 'Month', 'month_sin', 'month_cos', 'Days_Since_Start']])
+    df[['Year_scaled', 'Month_scaled', 'month_sin', 'month_cos', 'Days_Since_Start']] = sscaler.transform(df[['Year', 'Month', 'month_sin', 'month_cos', 'Days_Since_Start']])
     finalcols = ["Year", "Month_scaled", 'Vehicle_Class', 'Vehicle_Category','Month', 'month_sin', 'month_cos', 'State_EV_Group', 'Days_Since_Start','Log_EV_Sales_Quantity' ]
     dff = df[finalcols]
     og = pd.read_csv("src/data/qmldata/ready.csv")
