@@ -229,6 +229,7 @@ if 'input_type' in st.session_state:
                 if brand_id == 0:
                     name = "Ashok Leyland"
                     data = asl
+                    y_pred = 1.0
                 elif brand_id == 1:
                     name = "Hero MotoCorp"
                     data = hsl
@@ -248,12 +249,14 @@ if 'input_type' in st.session_state:
                     continue
 
                 last_xi = x_brand.iloc[-1].to_dict()
-                y_pred = model.predict_one(last_xi)
+                if brand_id != 0:
+                    y_pred = model.predict_one(last_xi)
+                    print(y_pred)
 
                 prev_xi = x_brand.iloc[-2].to_dict()
                 y_prev = model.predict_one(prev_xi)
 
-                if y_pred == 1.0:
+                if y_pred > 0:
                     arrow = "↗"
                     sentiment_text = "Positive"
                 else:
@@ -319,14 +322,14 @@ if 'input_type' in st.session_state:
             progress = st.progress(0)
             insights = []
 
-            for i, (_, row) in enumerate(brand_summary.iterrows()):
+            """for i, (_, row) in enumerate(brand_summary.iterrows()):
                 result = tech_to_business_agent.run(str(row.to_dict()))
                 insights.append(result.content)
                 progress.progress((i + 1) / len(brand_summary))
-            st.success("Analysis complete ✅")
+            st.success("Analysis complete ✅ ")
             for insight in insights:
                 with st.expander(insight.split('\n')[0].strip('#').strip(), expanded=False):
-                    st.markdown(insight, unsafe_allow_html=False)
+                    st.markdown(insight, unsafe_allow_html=False)"""
         with c2:
             st.subheader("Model Metrics")
             st.metric(label="Accuracy", value=f"{accuracy.get():.2%}")
@@ -423,41 +426,53 @@ if 'input_type' in st.session_state:
         st.subheader("On-Demand Regional Forecasts")
         col1, col2 = st.columns([3,3])
         with col1:
-            st.markdown("QML Model Quarterly Forecast")
+            st.markdown("Quantum Model Quarterly Forecast")
             df = pd.read_csv("src/data/qmldata/jul_aug_sep.csv")
-            forecast_df = forecast_ev_sales(year=2025, months=[9, 10, 11, 12])
-
-            # --- Standardize and combine ---
-            forecast_df = forecast_df.rename(columns={
-                "Predicted_Log_EV_Sales_Quantity": "Log_EV_Sales_Quantity"
-            })
-            forecast_df["Type"] = "Forecast"
-            df["Type"] = "Historical"
-            forecast_df.to_csv("src/data/quarter_forecast.csv", index=False)
+            forecast_df = pd.read_csv("src/data/quarter_forecast.csv")
             combined_df = pd.concat([df, forecast_df], ignore_index=True)
             combined_df = combined_df.sort_values(by="Month")
 
-            vehicle_options = sorted(combined_df["Vehicle_Category"].dropna().unique())
-            state_options = sorted(combined_df["State_EV_Group"].dropna().unique())
+            vehicle_options = ["2-Wheelers", "3-Wheelers", "4-Wheelers", "Bus", "Others"]
+            state_options = ["High-EV-Adoption", "Low-EV-Adoption", "Moderate-EV-Adoption"]
 
             selected_vehicle = st.selectbox("Select Vehicle Category (optional)", ["All"] + vehicle_options)
             selected_state = st.selectbox("Select State EV Group (optional)", ["All"] + state_options)
+
+
+
+            if selected_vehicle == "2-Wheelers":
+                selected_v = 0
+            elif selected_vehicle == "3-Wheelers":
+                selected_v = 1
+            elif selected_vehicle == "4-Wheelers":
+                selected_v = 2
+            elif selected_vehicle == "Bus":
+                selected_v = 3
+            elif selected_vehicle == "Others":
+                selected_v = 4
+
+            if selected_state == "High-EV-Adoption":
+                selected_s = 0
+            elif selected_state == "Low-EV-Adoption":
+                selected_s = 1
+            elif selected_state == "Moderate-EV-Adoption":
+                selected_s = 2
         
-            st.markdown("This model leverages advanced quantum machine learning techniques to capture complex patterns in EV sales data, providing robust forecasts across vehicle categories and state groups.")
+            st.markdown("High EV adoption states include those states where EV penetration is recorded as high, such as Maharastra, Karnataka, etc. Similarly moderate and low EV adoption states record lesser number of registrations and usage.")
             # --- Apply filters based on user choice ---
             filtered_df = combined_df.copy()
 
             if selected_vehicle != "All":
-                filtered_df = filtered_df[filtered_df["Vehicle_Category"] == selected_vehicle]
+                filtered_df = filtered_df[filtered_df["Vehicle_Category"] == selected_v]
 
             if selected_state != "All":
-                filtered_df = filtered_df[filtered_df["State_EV_Group"] == selected_state]
+                filtered_df = filtered_df[filtered_df["State_EV_Group"] == selected_s]
 
             # --- Determine coloring logic ---
             if selected_vehicle != "All" and selected_state == "All":
-                color_col = "State_EV_Group"        # user picked category → color by state
+                color_col = "State_EV_Category_1"        # user picked category → color by state
             elif selected_vehicle == "All" and selected_state != "All":
-                color_col = "Vehicle_Category"      # user picked state → color by category
+                color_col = "Vehicle_Category_1"      # user picked state → color by category
             else:
                 color_col = None                    # both selected or both “All” → single color
 
@@ -513,9 +528,9 @@ if 'input_type' in st.session_state:
             st.plotly_chart(forecast_fig, use_container_width=True)
             classical_json = classical_preds.to_json(orient="records")
 
-        """st.subheader("Tech to Business Angle - Sales against the Timeline")
+        st.subheader("Tech to Business Angle - Sales against the Timeline")
         col3, col4 = st.columns([3,3])
-        with col3:
+        """with col3:
             response_quantum = ev_forecast_analyst_agent.run(f"Quantum Dataframe Analysis for this dataframe: {quantum_json}")
             with st.expander("Quarterly Forecast by the Quantum Model", expanded=False):
                 st.markdown(response_quantum.content, unsafe_allow_html=False)
@@ -573,146 +588,155 @@ if 'input_type' in st.session_state:
         national = df_long.groupby("date", as_index=False)["Registrations"].sum()
         series = national.set_index("date").asfreq("MS")["Registrations"].fillna(0)
 
-        # ==================== 2️⃣ HYBRID SARIMAX (GDP EXOG) ====================
-        st.subheader("📊 Hybrid SARIMAX Forecast — Monthly Training, Quarterly Output (with GDP Growth)")
+        col1, col2 = st.columns([3,2])
+        with col1:
+            # ==================== 2️⃣ HYBRID SARIMAX (GDP EXOG) ====================
+            st.subheader("📊 Hybrid SARIMAX Forecast — Monthly Training, Quarterly Output (with GDP Growth)")
 
-        # --- Step 1: Monthly EV series ---
-        ev_monthly = series.asfreq("MS").fillna(method="ffill").fillna(0)
+            # --- Step 1: Monthly EV series ---
+            ev_monthly = series.asfreq("MS").fillna(method="ffill").fillna(0)
 
-        # --- Step 2: GDP growth (quarterly → monthly upsample) ---
-        gdp_values = [
-            7.5, 6.5, 6.2, 5.7, 5.1, 4.3, 3.3, 2.9,
-            -23.1, -5.8, 1.8, 3.3, 22.6, 9.9, 5.5, 4.5,
-            13.5, 6.0, 4.8, 6.9, 9.7, 9.3, 9.5, 8.4,
-            6.5, 5.6, 6.4, 6.7, 7.4, 7.8
-        ]
-        gdp_index = pd.date_range(start="2018-03-31", periods=len(gdp_values), freq="QE")
-        gdp_quarterly = pd.DataFrame({"GDP_Growth": gdp_values}, index=gdp_index)
-        gdp_monthly = gdp_quarterly.resample("MS").ffill()
-        gdp_monthly = gdp_monthly.reindex(ev_monthly.index).ffill().bfill()
+            # --- Step 2: GDP growth (quarterly → monthly upsample) ---
+            gdp_values = [
+                7.5, 6.5, 6.2, 5.7, 5.1, 4.3, 3.3, 2.9,
+                -23.1, -5.8, 1.8, 3.3, 22.6, 9.9, 5.5, 4.5,
+                13.5, 6.0, 4.8, 6.9, 9.7, 9.3, 9.5, 8.4,
+                6.5, 5.6, 6.4, 6.7, 7.4, 7.8
+            ]
+            gdp_index = pd.date_range(start="2018-03-31", periods=len(gdp_values), freq="QE")
+            gdp_quarterly = pd.DataFrame({"GDP_Growth": gdp_values}, index=gdp_index)
+            gdp_monthly = gdp_quarterly.resample("MS").ffill()
+            gdp_monthly = gdp_monthly.reindex(ev_monthly.index).ffill().bfill()
 
-        # --- Step 3: Train/test split ---
-        train_end = "2024-12-01"
-        y_train = ev_monthly.loc[:train_end]
-        y_test = ev_monthly.loc["2025-01-01":]
-        exog_train = gdp_monthly.loc[:train_end]
-        exog_test = gdp_monthly.loc["2025-01-01":]
+            # --- Step 3: Train/test split ---
+            train_end = "2024-12-01"
+            y_train = ev_monthly.loc[:train_end]
+            y_test = ev_monthly.loc["2025-01-01":]
+            exog_train = gdp_monthly.loc[:train_end]
+            exog_test = gdp_monthly.loc["2025-01-01":]
 
-        # --- Step 4: Fit SARIMAX model ---
-        model_x = SARIMAX(
-            y_train, exog=exog_train,
-            order=(1, 1, 1), seasonal_order=(1, 1, 1, 12),
-            enforce_stationarity=False, enforce_invertibility=False
-        )
-        res_x = model_x.fit(disp=False)
+            # --- Step 4: Fit SARIMAX model ---
+            model_x = SARIMAX(
+                y_train, exog=exog_train,
+                order=(1, 1, 1), seasonal_order=(1, 1, 1, 12),
+                enforce_stationarity=False, enforce_invertibility=False
+            )
+            res_x = model_x.fit(disp=False)
 
-        # --- Step 5: Forecast (test) ---
-        forecast_x = res_x.get_forecast(steps=len(y_test), exog=exog_test)
-        forecast_mean_x = forecast_x.predicted_mean
-        forecast_ci_x = forecast_x.conf_int()
+            # --- Step 5: Forecast (test) ---
+            forecast_x = res_x.get_forecast(steps=len(y_test), exog=exog_test)
+            forecast_mean_x = forecast_x.predicted_mean
+            forecast_ci_x = forecast_x.conf_int()
 
-        # --- Step 6: Evaluation ---
-        mae_m = mean_absolute_error(y_test, forecast_mean_x)
-        rmse_m = np.sqrt(mean_squared_error(y_test, forecast_mean_x))
-        r2_m = r2_score(y_test, forecast_mean_x)
+            # --- Step 6: Evaluation ---
+            mae_m = mean_absolute_error(y_test, forecast_mean_x)
+            rmse_m = np.sqrt(mean_squared_error(y_test, forecast_mean_x))
+            r2_m = r2_score(y_test, forecast_mean_x)
 
-        # Aggregate to quarterly
-        ev_quarterly = ev_monthly.resample("QE").sum()
-        forecast_quarterly_test = forecast_mean_x.resample("QE").sum()
-        actual_quarterly_test = y_test.resample("QE").sum()
+            # Aggregate to quarterly
+            ev_quarterly = ev_monthly.resample("QE").sum()
+            forecast_quarterly_test = forecast_mean_x.resample("QE").sum()
+            actual_quarterly_test = y_test.resample("QE").sum()
 
-        mae_q = mean_absolute_error(actual_quarterly_test, forecast_quarterly_test)
-        rmse_q = np.sqrt(mean_squared_error(actual_quarterly_test, forecast_quarterly_test))
-        r2_q = r2_score(actual_quarterly_test, forecast_quarterly_test)
+            mae_q = mean_absolute_error(actual_quarterly_test, forecast_quarterly_test)
+            rmse_q = np.sqrt(mean_squared_error(actual_quarterly_test, forecast_quarterly_test))
+            r2_q = r2_score(actual_quarterly_test, forecast_quarterly_test)
 
-        st.write("**Monthly Performance (Test period)**")
-        st.write(f"• MAE = {mae_m:,.2f} • RMSE = {rmse_m:,.2f} • R² = {r2_m:.3f}")
-        st.write("**Quarterly Performance (Aggregated)**")
-        st.write(f"• MAE = {mae_q:,.2f} • RMSE = {rmse_q:,.2f} • R² = {r2_q:.3f}")
+            # --- Step 7: Future forecast (24 months) ---
+            future_months = 36  # Changed from 24 to 36 to ensure we get full 2025-2027
+            future_index = pd.date_range(start=ev_monthly.index[-1] + pd.offsets.MonthBegin(1),
+                                        periods=future_months, freq="MS")
 
-        # --- Step 7: Future forecast (24 months) ---
-        future_months = 36  # Changed from 24 to 36 to ensure we get full 2025-2027
-        future_index = pd.date_range(start=ev_monthly.index[-1] + pd.offsets.MonthBegin(1),
-                                    periods=future_months, freq="MS")
-
-     
-        future_exog = pd.DataFrame({"GDP_Growth": gdp_monthly["GDP_Growth"].iloc[-1]}, index=future_index)
-        future_pred = res_x.get_forecast(steps=future_months, exog=future_exog)
-        future_mean = future_pred.predicted_mean
-        future_ci = future_pred.conf_int()
-
-        # Aggregate to quarterly for downstream energy section
-        ev_forecast = future_mean.resample("QE").sum()
-
-      
-        # --- Step 8: Plot ---
-        fig_sarimax = go.Figure()
-        fig_sarimax.add_trace(go.Scatter(x=ev_monthly.index, y=ev_monthly, mode="lines", name="Observed"))
-        fig_sarimax.add_trace(go.Scatter(x=forecast_mean_x.index, y=forecast_mean_x, mode="lines", name="Forecast (Test)", line=dict(color="orange")))
-        fig_sarimax.add_trace(go.Scatter(x=future_mean.index, y=future_mean, mode="lines", name="Future Forecast", line=dict(color="green")))
-        fig_sarimax.add_trace(go.Scatter(x=future_ci.index, y=future_ci.iloc[:, 0], fill=None, mode="lines", line_color="green", showlegend=False))
-        fig_sarimax.add_trace(go.Scatter(x=future_ci.index, y=future_ci.iloc[:, 1], fill='tonexty', mode="lines", line_color="green", opacity=0.2, name="Confidence Interval"))
-        fig_sarimax.update_layout(
-            title="Hybrid SARIMAX Forecast — Monthly Training, Quarterly Output (GDP as Exogenous)",
-            xaxis_title="Date", yaxis_title="EV Registrations",
-            paper_bgcolor="#bef0e5", plot_bgcolor="#bef0e5", font=dict(color="#000000")
-        )
-        st.plotly_chart(fig_sarimax, use_container_width=True)
-
-        # ==================== 3️⃣ ENERGY FORECAST ====================
-        st.subheader("🔋 Energy Consumption Prediction (2025–2027)")
-
-        category_share = {'TWO WHEELER': 0.57, 'THREE WHEELER': 0.33, 'FOUR WHEELER': 0.10}
-        ev_data = {
-            'TWO WHEELER': {'Daily_km': 25, 'Range_km': 141, 'Battery_kWh': 2.98},
-            'THREE WHEELER': {'Daily_km': 60, 'Range_km': 129, 'Battery_kWh': 3.7},
-            'FOUR WHEELER': {'Daily_km': 40, 'Range_km': 312, 'Battery_kWh': 30.2}
-        }
-        vehicle_lifetime_years = 10
-        charging_efficiency = 0.9
-
-        # Compute energy forecast
-        all_quarters = pd.concat([ev_quarterly, ev_forecast])
-        fleet_df = pd.DataFrame(index=all_quarters.index)
-        for cat, share in category_share.items():
-            fleet_df[f'{cat}_New'] = all_quarters * share
-
-        for cat in category_share.keys():
-            new_v = fleet_df[f'{cat}_New'].values
-            active = np.zeros(len(all_quarters))
-            for i in range(len(all_quarters)):
-                for j in range(i + 1):
-                    age_yrs = (i - j) / 4
-                    if age_yrs <= vehicle_lifetime_years:
-                        survival = 1 - (age_yrs / vehicle_lifetime_years)
-                        active[i] += new_v[j] * survival
-            fleet_df[f'{cat}_Active'] = active
-
-        days_in_quarter = pd.Series(all_quarters.index).diff().dt.days.fillna(91).values
-        for cat in category_share.keys():
-            dE = ev_data[cat]['Battery_kWh'] * ev_data[cat]['Daily_km'] / ev_data[cat]['Range_km']
-            fleet_df[f'{cat}_Energy_MWh'] = (fleet_df[f'{cat}_Active'] * dE * days_in_quarter / 1000 / charging_efficiency)
-
-        fleet_df["TotalEnergy_MWh"] = fleet_df[[f'{cat}_Energy_MWh' for cat in category_share]].sum(axis=1)
-        future_energy = fleet_df.loc[fleet_df.index > ev_quarterly.index[-1]]
-
-        fig_energy = px.line(
-            future_energy[[f'{cat}_Energy_MWh' for cat in category_share]].reset_index().melt(id_vars='index', var_name='Category', value_name='Energy_MWh'),
-            x='index', y='Energy_MWh', color='Category',
-            title="Forecasted EV Energy Demand by Category (MWh, Quarterly)", markers=True
-        )
-        fig_energy.update_layout(paper_bgcolor="#bef0e5", plot_bgcolor="#bef0e5", font=dict(color="#000000"))
         
-        # Side-by-side layout for energy chart and formula
-        c1_energy, c2_energy = st.columns([2, 1])
-        with c1_energy:
+            future_exog = pd.DataFrame({"GDP_Growth": gdp_monthly["GDP_Growth"].iloc[-1]}, index=future_index)
+            future_pred = res_x.get_forecast(steps=future_months, exog=future_exog)
+            future_mean = future_pred.predicted_mean
+            future_ci = future_pred.conf_int()
+
+            # Aggregate to quarterly for downstream energy section
+            ev_forecast = future_mean.resample("QE").sum()
+
+        
+            # --- Step 8: Plot ---
+            fig_sarimax = go.Figure()
+            fig_sarimax.add_trace(go.Scatter(x=ev_monthly.index, y=ev_monthly, mode="lines", name="Observed"))
+            fig_sarimax.add_trace(go.Scatter(x=forecast_mean_x.index, y=forecast_mean_x, mode="lines", name="Forecast (Test)", line=dict(color="orange")))
+            fig_sarimax.add_trace(go.Scatter(x=future_mean.index, y=future_mean, mode="lines", name="Future Forecast", line=dict(color="green")))
+            fig_sarimax.add_trace(go.Scatter(x=future_ci.index, y=future_ci.iloc[:, 0], fill=None, mode="lines", line_color="green", showlegend=False))
+            fig_sarimax.add_trace(go.Scatter(x=future_ci.index, y=future_ci.iloc[:, 1], fill='tonexty', mode="lines", line_color="green", opacity=0.2, name="Confidence Interval"))
+            fig_sarimax.update_layout(
+                title="Hybrid SARIMAX Quarterly Forecast — GDP as Exogenous Variable",
+                xaxis_title="Date", yaxis_title="EV Registrations",
+                paper_bgcolor="#bef0e5", plot_bgcolor="#bef0e5", font=dict(color="#000000")
+            )
+            st.plotly_chart(fig_sarimax, use_container_width=True)
+
+            category_share = {'TWO WHEELER': 0.57, 'THREE WHEELER': 0.33, 'FOUR WHEELER': 0.10}
+            ev_data = {
+                'TWO WHEELER': {'Daily_km': 25, 'Range_km': 141, 'Battery_kWh': 2.98},
+                'THREE WHEELER': {'Daily_km': 60, 'Range_km': 129, 'Battery_kWh': 3.7},
+                'FOUR WHEELER': {'Daily_km': 40, 'Range_km': 312, 'Battery_kWh': 30.2}
+            }
+            vehicle_lifetime_years = 10
+            charging_efficiency = 0.9
+
+            # Compute energy forecast
+            all_quarters = pd.concat([ev_quarterly, ev_forecast])
+            fleet_df = pd.DataFrame(index=all_quarters.index)
+            for cat, share in category_share.items():
+                fleet_df[f'{cat}_New'] = all_quarters * share
+
+            for cat in category_share.keys():
+                new_v = fleet_df[f'{cat}_New'].values
+                active = np.zeros(len(all_quarters))
+                for i in range(len(all_quarters)):
+                    for j in range(i + 1):
+                        age_yrs = (i - j) / 4
+                        if age_yrs <= vehicle_lifetime_years:
+                            survival = 1 - (age_yrs / vehicle_lifetime_years)
+                            active[i] += new_v[j] * survival
+                fleet_df[f'{cat}_Active'] = active
+
+            days_in_quarter = pd.Series(all_quarters.index).diff().dt.days.fillna(91).values
+            for cat in category_share.keys():
+                dE = ev_data[cat]['Battery_kWh'] * ev_data[cat]['Daily_km'] / ev_data[cat]['Range_km']
+                fleet_df[f'{cat}_Energy_MWh'] = (fleet_df[f'{cat}_Active'] * dE * days_in_quarter / 1000 / charging_efficiency)
+
+            fleet_df["TotalEnergy_MWh"] = fleet_df[[f'{cat}_Energy_MWh' for cat in category_share]].sum(axis=1)
+            future_energy = fleet_df.loc[fleet_df.index > ev_quarterly.index[-1]]
+            future_energy.to_csv("ev_energy_forecast_2025_2027.csv")
+
+            fig_energy = px.line(
+                future_energy[[f'{cat}_Energy_MWh' for cat in category_share]].reset_index().melt(id_vars='index', var_name='Category', value_name='Energy_MWh'),
+                x='index', y='Energy_MWh', color='Category',
+                title="Forecasted EV Energy Demand by Category (MWh, Quarterly)", markers=True
+            )
+            fig_energy.update_layout(paper_bgcolor="#bef0e5", plot_bgcolor="#bef0e5", font=dict(color="#000000"))
+
+            st.subheader("🔋 Energy Consumption Prediction (2025–2027)")
             st.plotly_chart(fig_energy, use_container_width=True)
             st.markdown(
                 "<h6 style='text-align: center; color: #a8872dff;'>Energy demand forecast broken down by vehicle category.</h6>", 
                 unsafe_allow_html=True
             )
-        
-        with c2_energy:
+        with col2:
+            st.subheader("Model Evaluation Metrics")
+            st.write("**Monthly Performance (Test period)**")
+            st.write(f"• MAE = {mae_m:,.2f} • RMSE = {rmse_m:,.2f} • R² = {r2_m:.3f}")
+            st.write("**Quarterly Performance (Aggregated)**")
+            st.write(f"• MAE = {mae_q:,.2f} • RMSE = {rmse_q:,.2f} • R² = {r2_q:.3f}")
+            st.write("")
+            df = pd.read_csv("ev_energy_forecast_2025_2027.csv")
+            df.to_json("output.json", orient="records", indent=4)
+            
+            with open("output.json") as f:
+                dataset = json.load(f)
+            st.subheader("Tech to Business Angle - Charging Behavior Analysis")
+            with st.spinner("Analyzing..."):
+                result = charging_intelligence_agent.run(f"Analyze the EV energy consumption dataset for 2025-2027: {json.dumps(dataset)} Provide insights on charging behavior, energy demand trends, and infrastructure implications.")
+            st.markdown(result.content, unsafe_allow_html=False)
+            st.write("")
+            st.subheader("⚡ EV Energy Demand Calculation Formula")
             st.latex(r"""
             E_{\text{quarter}} = 
             \frac{N_{\text{active}} \times D_{\text{daily}} \times B_{\text{kWh}} \times \text{Days}_{\text{quarter}}}
@@ -946,11 +970,11 @@ if 'input_type' in st.session_state:
     elif st.session_state.input_type == "about":
         news_container = st.container(border=True)
          # Fetch and display news summary
-        """with news_container:
+        with news_container:
             col_left, col_right = st.columns(2)
             from src.model.news import fetch_news_data
             #UNCOMMENT TO RUN AGENT 
-            news_summary = fetch_news_data()
+            """news_summary = fetch_news_data()
             half = len(news_summary) // 2
             with col_left:
                 st.header('On the Headlines')
