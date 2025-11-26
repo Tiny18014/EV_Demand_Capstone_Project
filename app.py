@@ -108,6 +108,38 @@ with hero2:
 
 cols = st.columns([1, 2, 1, 2, 1, 2, 1, 2, 1])
 
+st.markdown("""
+<style>
+
+.stButton > button {
+    background:#E6F7FF;
+    color:#00394F;
+    font-size:14px;
+    font-weight: bold;
+    border-radius:12px;
+    padding:8px 18px;
+    cursor:pointer;
+    transition:0.25s ease;
+}
+
+.stButton > button:hover {
+    background:#D0F0FF;
+    color:#052934ff;
+    transform:translateY(-2px);
+    font-weight:bold;
+    box-shadow:0px 2px 6px rgba(0,0,0,0.08);
+}
+
+.stButton > button:active {
+    background:#B9E8FB;
+    transform:scale(0.97);
+    font-weight:bold;
+    box-shadow:0px 1px 4px rgba(0,0,0,0.08);
+}
+
+</style>
+""", unsafe_allow_html=True)
+
 
 # Place buttons in every other column
 with cols[1]:
@@ -255,15 +287,15 @@ if 'input_type' in st.session_state:
 
                 prev_xi = x_brand.iloc[-2].to_dict()
                 y_prev = model.predict_one(prev_xi)
-
-                if y_pred > 0:
+                deltaa = data.iloc[-1]-data.iloc[-2]
+                if y_pred == 1.0:
                     arrow = "↗"
                     sentiment_text = "Positive"
                 else:
                     arrow = "↘"
                     sentiment_text = "Negative"
 
-                deltaa = data.iloc[-1]-data.iloc[-2]
+                
 
                 with cols[i]:
                         st.markdown(f"#### {name}")
@@ -299,19 +331,46 @@ if 'input_type' in st.session_state:
         c1_graph, c2_graph = st.columns(2)
         with c1_graph:
             st.subheader("Sentiment Momentum Comparison")
-            st.plotly_chart(fig_momentum, use_container_width=True)
             st.markdown(
-    "<h6 style='text-align: center; color: #a8872dff;'>Shows sentiment momentum over time for each brand.</h4>", 
-    unsafe_allow_html=True
-)
+        """
+        <div style="
+            background-color:#E6F7FF;
+            padding:10px;
+            border-radius:12px;
+            font-size:12px;
+            color:#00394F;
+            text-align:center;
+            ">
+            <b>This chart shows how sentiment shifts over time for each brand, allowing you to observe whether public perception is strengthening or weakening — the direction and consistency of these changes indicate momentum. Momentum reflects the rate of change in sentiment, highlighting trends beyond static scores.
+                </b>
+        </div>
+        """,
+        unsafe_allow_html=True
+    ) 
+            st.plotly_chart(fig_momentum, use_container_width=True)
+            
+           
         with c2_graph:
 
             st.subheader("Sentiment Intensity Comparison")
-            st.plotly_chart(fig_bar_sentiment, use_container_width=True)
             st.markdown(
-    "<h6 style='text-align: center; color: #a8872dff;'>Compares overall sentiment intensity across brands.</h4>", 
+    """
+    <div style="
+        background-color:#E6F7FF;
+        padding:10px;
+        border-radius:12px;
+        font-size:12px;
+        color:#00394F;
+        text-align:center;
+        ">
+        <b>VADER reflects positive language while BERT detects a more negative tone. The difference between them indicates confidence — a narrow gap signals stable sentiment, while a wider gap suggests surface-level positivity with weaker underlying support.</b>
+    </div>
+    """,
     unsafe_allow_html=True
 )
+            st.plotly_chart(fig_bar_sentiment, use_container_width=True)
+            
+
 
         #agent and model metrics
         c1,c2 = st.columns([2,1])
@@ -357,16 +416,14 @@ if 'input_type' in st.session_state:
         df_2025 = get_2025_data()
         classical_preds = run_classical_predictions(df_2025)
         classical_report = generate_agent_report(classical_preds, "Classical")
-        # --- Final Performance Section ---
-        st.markdown("---")
-        st.header("Final Model & Simulation Performance")
+
 
         # Create the side-by-side layout
         c1_graph, c2_metrics = st.columns([2, 1])
 
         # --- Left Column: Simulation Graph ---
         with c1_graph:
-            st.subheader("Simulation Performance Over Time")
+            st.markdown("**Simulation Performance Over Time**")
             st.markdown("This graph shows how the models performed in a day-by-day forecasting simulation, comparing predicted sales to the actual sales generated during the run.")
 
             # IMPORTANT: DB_PATH is set to the confirmed location: src/model/
@@ -391,7 +448,7 @@ if 'input_type' in st.session_state:
 
         # --- Right Column: Formatted Training Metrics ---
         with c2_metrics:
-            st.subheader("Model Performance on Test Data")
+            st.markdown("**Model Performance on Test Data**")
             st.markdown("Metrics from the initial model training, showing performance on the original test set.")
 
             # This uses the modified get_training_performance_summary()
@@ -457,8 +514,24 @@ if 'input_type' in st.session_state:
                 selected_s = 1
             elif selected_state == "Moderate-EV-Adoption":
                 selected_s = 2
-        
-            st.markdown("High EV adoption states include those states where EV penetration is recorded as high, such as Maharastra, Karnataka, etc. Similarly moderate and low EV adoption states record lesser number of registrations and usage.")
+
+            st.markdown(
+        """
+        <div style="
+            background-color:#E6F7FF;
+            padding:10px;
+            border-radius:12px;
+            font-size:12px;
+            color:#00394F;
+            text-align:center;
+            ">
+            <b>High EV adoption states include those states where EV penetration is recorded as high, such as Maharastra, Karnataka, etc. Similarly moderate and low EV adoption states record lesser number of registrations and usage.
+                </b>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
             # --- Apply filters based on user choice ---
             filtered_df = combined_df.copy()
 
@@ -591,8 +664,6 @@ if 'input_type' in st.session_state:
         col1, col2 = st.columns([3,2])
         with col1:
             # ==================== 2️⃣ HYBRID SARIMAX (GDP EXOG) ====================
-            st.subheader("📊 Hybrid SARIMAX Forecast — Monthly Training, Quarterly Output (with GDP Growth)")
-
             # --- Step 1: Monthly EV series ---
             ev_monthly = series.asfreq("MS").fillna(method="ffill").fillna(0)
 
@@ -709,16 +780,27 @@ if 'input_type' in st.session_state:
             fig_energy = px.line(
                 future_energy[[f'{cat}_Energy_MWh' for cat in category_share]].reset_index().melt(id_vars='index', var_name='Category', value_name='Energy_MWh'),
                 x='index', y='Energy_MWh', color='Category',
-                title="Forecasted EV Energy Demand by Category (MWh, Quarterly)", markers=True
+                title="Energy Consumption Prediction (2025–2027", markers=True
             )
             fig_energy.update_layout(paper_bgcolor="#bef0e5", plot_bgcolor="#bef0e5", font=dict(color="#000000"))
 
-            st.subheader("🔋 Energy Consumption Prediction (2025–2027)")
+
             st.plotly_chart(fig_energy, use_container_width=True)
             st.markdown(
-                "<h6 style='text-align: center; color: #a8872dff;'>Energy demand forecast broken down by vehicle category.</h6>", 
+                """
+                <div style="
+                    background-color:#E6F7FF;
+                    padding:10px;
+                    border-radius:12px;
+                    font-size:12px;
+                    color:#00394F;
+                    text-align:center;
+                    ">
+                    <b>Energy demand forecast broken down by vehicle category</b>
+                </div>
+                """,
                 unsafe_allow_html=True
-            )
+            ) 
         with col2:
             st.subheader("Model Evaluation Metrics")
             st.write("**Monthly Performance (Test period)**")
@@ -732,9 +814,9 @@ if 'input_type' in st.session_state:
             with open("output.json") as f:
                 dataset = json.load(f)
             st.subheader("Tech to Business Angle - Charging Behavior Analysis")
-            with st.spinner("Analyzing..."):
+            """with st.spinner("Analyzing..."):
                 result = charging_intelligence_agent.run(f"Analyze the EV energy consumption dataset for 2025-2027: {json.dumps(dataset)} Provide insights on charging behavior, energy demand trends, and infrastructure implications.")
-            st.markdown(result.content, unsafe_allow_html=False)
+            st.markdown(result.content, unsafe_allow_html=False)"""
             st.write("")
             st.subheader("⚡ EV Energy Demand Calculation Formula")
             st.latex(r"""
@@ -763,7 +845,6 @@ if 'input_type' in st.session_state:
             """, unsafe_allow_html=True)
 
         # ==================== 4️⃣ INFRASTRUCTURE WITH PREDICTIONS ====================
-        st.subheader("🏗️ Charging Infrastructure — Top 5 States with Predictions")
         stations_df = pd.read_excel(stations_path)
         stations_df.columns = stations_df.columns.astype(str).str.strip()
         top5 = stations_df.sort_values(by="2024", ascending=False).head(5)
@@ -845,20 +926,41 @@ if 'input_type' in st.session_state:
         with c1_infra:
             st.plotly_chart(fig_st, use_container_width=True)
             st.markdown(
-                "<h6 style='text-align: center; color: #a8872dff;'>State-wise infrastructure growth and predictions.</h6>", 
-                unsafe_allow_html=True
-            )
+        """
+        <div style="
+            background-color:#E6F7FF;
+            padding:10px;
+            border-radius:12px;
+            font-size:12px;
+            color:#00394F;
+            text-align:center;
+            ">
+            <b>State-wise infrastructure growth and predictions</b>
+        </div>
+        """,
+        unsafe_allow_html=True
+    ) 
         
         with c2_infra:
             st.plotly_chart(fig_national, use_container_width=True)
             st.markdown(
-                "<h6 style='text-align: center; color: #a8872dff;'>National-level charging station trends and forecasts.</h6>", 
-                unsafe_allow_html=True
-            )
+        """
+        <div style="
+            background-color:#E6F7FF;
+            padding:10px;
+            border-radius:12px;
+            font-size:12px;
+            color:#00394F;
+            text-align:center;
+            ">
+            <b>National-level charging station trends and forecasts</b>
+        </div>
+        """,
+        unsafe_allow_html=True
+    ) 
+
 
         # ==================== 6️⃣ INFRASTRUCTURE vs ENERGY DEMAND ANALYSIS ====================
-        st.subheader("⚖️ Infrastructure Adequacy Analysis")
-
         # Assumptions for analysis
         avg_charger_power_kw = 50
         chargers_per_station = 3
@@ -937,16 +1039,28 @@ if 'input_type' in st.session_state:
         with c1_adequacy:
             st.plotly_chart(fig_compare, use_container_width=True)
             st.markdown(
-                "<h6 style='text-align: center; color: #a8872dff;'>Comparison of infrastructure capacity vs predicted energy demand.</h6>", 
-                unsafe_allow_html=True
-            )
+        """
+        <div style="
+            background-color:#E6F7FF;
+            padding:10px;
+            border-radius:12px;
+            font-size:12px;
+            color:#00394F;
+            text-align:center;
+            ">
+            <b>Comparison of infrastructure capacity vs predicted energy demand</b>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
         
         with c2_adequacy:
             # Summary metrics
             avg_adequacy = comparison_df['Adequacy_Ratio'].mean()
             min_adequacy = comparison_df['Adequacy_Ratio'].min()
             deficit_quarters = (comparison_df['Surplus_Deficit_MWh'] < 0).sum()
-
+            st.write("")
+            st.write("")
             st.markdown(f"""
             <div style="
                 background-color:#E8F0EB;
@@ -956,7 +1070,7 @@ if 'input_type' in st.session_state:
                 color:#0A0A0A;
                 font-size:15px;
                 line-height:1.8;">
-            <b>📊 Adequacy Summary</b><br><br>
+            <b>Adequacy Summary</b><br><br>
             • <b>Avg Ratio:</b> {avg_adequacy:.2f}x<br>
             • <b>Min Ratio:</b> {min_adequacy:.2f}x<br>
             • <b>Deficit Quarters:</b> {deficit_quarters}/{len(comparison_df)}<br><br>
@@ -989,21 +1103,20 @@ if 'input_type' in st.session_state:
             ev_count = 7.02e6  # 7.02 million
             charging_stations = 29277
             co2_saved = 10e6  # 10 million tonnes
-            ss = st.container(border=True)
-            with ss:
-                col1, col2, col3 = st.columns([1, 1, 1])
-                with col1:
-                    st.metric(label="Registered EVs in India", value=f"{ev_count:,.0f}")
-                    st.markdown("<p style='font-size: 12px;'>(2025)</p>", unsafe_allow_html=True)
-                    st.write("")
-                with col2:
-                    st.metric(label="EV Charging Stations", value=f"{charging_stations:,}")
-                    st.markdown("<p style='font-size: 12px;'>(2025)</p>", unsafe_allow_html=True)
-                    st.write("")
-                with col3:
-                    st.metric(label="Estimated CO₂ Avoided", value=f"{co2_saved/1e6:.2f}")
-                    st.markdown("<p style='font-size: 12px;'>(in tonnes)</p>", unsafe_allow_html=True)
-                    st.write("")
+
+            col1, col2, col3 = st.columns([1, 1, 1])
+            with col1:
+                st.metric(label="Registered EVs in India", value=f"{ev_count:,.0f}")
+                st.markdown("<p style='font-size: 12px;'>(2025)</p>", unsafe_allow_html=True)
+                st.write("")
+            with col2:
+                st.metric(label="EV Charging Stations", value=f"{charging_stations:,}")
+                st.markdown("<p style='font-size: 12px;'>(2025)</p>", unsafe_allow_html=True)
+                st.write("")
+            with col3:
+                st.metric(label="Estimated CO₂ Avoided", value=f"{co2_saved/1e6:.2f}")
+                st.markdown("<p style='font-size: 12px;'>(in tonnes)</p>", unsafe_allow_html=True)
+                st.write("")
             st.markdown("Leveraging advanced online models, hybrid quantum-classical forecasts and agentic AI transforming technical output to business insights, this dashboard provides a comprehensive overview into the current EV demand through factors like sales, sentiment and charging behavior. It further approaches the business domain with a well rounded dynamic PESTEL analysis, identifying the various demand drivers of the EV domain, along with the extent of contribution of each factor.", unsafe_allow_html=True)
             st.markdown("")
         with col_about:
@@ -1025,18 +1138,22 @@ st.markdown(" ")
 st.markdown(" ")
 st.markdown(" ")
 st.markdown(
-    """
-    <div style="background-color: #E8F0EB;
-            color: #0A0A0A; border: 1px solid #E8F0EB; padding: 5px; border-radius: 20px;">
-        <h6 style='text-align: center;'>Disclaimer</h6>
-        <p style='text-align: center;'>
-            This application is designed to analyse and forecast trends in the electric vehicle (EV) market using historical data and machine learning models.
+        """
+        <div style="
+            background-color:#E6F7FF;
+            padding:10px;
+            border-radius:12px;
+            font-size:12px;
+            color:#00394F;
+            text-align:center;
+            ">
+            <h6><b>Disclaimer</b></h6>
+            <b>This application is designed to analyse and forecast trends in the electric vehicle (EV) market using historical data and machine learning models.
             The predictions and insights provided are based on the data available up to the current date and may not account for unforeseen market changes, technological advancements, or regulatory shifts.
-        </p>     
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
+                </b>
+        </div>
+        """,
+        unsafe_allow_html=True
+    ) 
 st.markdown(" ")
 st.markdown("<p style='text-align: center; color: #000000;'>© 2025 EVolutionIndia. All rights reserved.</p>", unsafe_allow_html=True)
