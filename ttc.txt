@@ -135,3 +135,6 @@ col_stock, col_agent = st.columns([2,3])
                     st.markdown(x[:half], unsafe_allow_html=False)
                 with col_right:
                     st.markdown(x[half:], unsafe_allow_html=False)"""
+
+
+#052934ff

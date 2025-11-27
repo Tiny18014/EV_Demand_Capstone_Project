@@ -21,7 +21,7 @@ import plotly.graph_objects as go
 
 
 st.set_page_config(
-    page_title='Capstone2025',
+    page_title='EVolutionIndia',
     page_icon='🏎️',
     layout="wide"
 )
@@ -1094,29 +1094,85 @@ if 'input_type' in st.session_state:
                 st.header('On the Headlines')
                 st.markdown(news_summary[:half])
             with col_right:
-                st.markdown(news_summary[half:])"""
+                st.markdown("-" + news_summary[half:])"""
 
         col_why, col_about = st.columns([2,1], gap="small") 
         with col_why:
             st.header('Why electric vehicles?')
             st.markdown("In 2025, the world stands at the crossroads of innovation and sustainability, and electric vehicles are at the heart of this transformation. Our project explores the evolving landscape of EV technology—where clean energy, intelligent systems, and advanced engineering converge to redefine mobility. By focusing on electric vehicles, we aim to contribute to a future that is not only more efficient and connected but also environmentally responsible, aligning technological progress with global sustainability goals.")
-            ev_count = 7.02e6  # 7.02 million
-            charging_stations = 29277
-            co2_saved = 10e6  # 10 million tonnes
+            st.write("")
 
-            col1, col2, col3 = st.columns([1, 1, 1])
-            with col1:
-                st.metric(label="Registered EVs in India", value=f"{ev_count:,.0f}")
-                st.markdown("<p style='font-size: 12px;'>(2025)</p>", unsafe_allow_html=True)
-                st.write("")
-            with col2:
-                st.metric(label="EV Charging Stations", value=f"{charging_stations:,}")
-                st.markdown("<p style='font-size: 12px;'>(2025)</p>", unsafe_allow_html=True)
-                st.write("")
-            with col3:
-                st.metric(label="Estimated CO₂ Avoided", value=f"{co2_saved/1e6:.2f}")
-                st.markdown("<p style='font-size: 12px;'>(in tonnes)</p>", unsafe_allow_html=True)
-                st.write("")
+            st.markdown("""
+                <style>
+                :root{
+                --bg:#E6F7FF;
+                --text:#00394F;
+                --muted:#00394Faa;
+                --radius:12px;
+                --gap:12px;
+                }
+
+                .metrics-grid{
+                display:grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap:var(--gap);
+                width:100%;
+                }
+
+                .metric{
+                background-color: var(--bg);
+                padding:10px;
+                border-radius:var(--radius);
+                font-size:12px;
+                color:var(--text);
+                text-align:center;
+                width:100%;
+                box-shadow:none !important;
+                }
+
+                .metric-value{
+                font-size:28px;
+                font-weight:700;
+                color:var(--text);
+                }
+
+                .metric-label{
+                font-size:13px;
+                color:var(--muted);
+                margin-top:3px;
+                }
+
+                .metric-foot{
+                font-size:12px;
+                margin-top:6px;
+                color:var(--text);
+                }
+
+                .sparkline{width:100px;height:30px}
+                </style>
+
+                <div class="metrics-grid">
+
+                <div class="metric">
+                <div class="metric-value">7.02 Mn</div>
+                <div class="metric-label">EVs in India</div>
+                </div>
+
+                <div class="metric">
+                <div class="metric-value">29,277</div>
+                <div class="metric-label">Number of Charging Stations</div>
+                </div>
+
+                <div class="metric">
+                <div class="metric-value">10.0 Mn Tons</div>
+                <div class="metric-label">Carbon Emissions Reduced</div>
+                </div>
+
+                </div>
+                """, unsafe_allow_html=True)
+
+
+            st.markdown("")
             st.markdown("Leveraging advanced online models, hybrid quantum-classical forecasts and agentic AI transforming technical output to business insights, this dashboard provides a comprehensive overview into the current EV demand through factors like sales, sentiment and charging behavior. It further approaches the business domain with a well rounded dynamic PESTEL analysis, identifying the various demand drivers of the EV domain, along with the extent of contribution of each factor.", unsafe_allow_html=True)
             st.markdown("")
         with col_about:
