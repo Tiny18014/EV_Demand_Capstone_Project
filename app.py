@@ -140,6 +140,14 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+<style>
+b, strong {
+    color:#00394F !important;   /* same deep blue as your theme */
+    font-weight:700;            /* ensures strong bold presence */
+}
+</style>
+""", unsafe_allow_html=True)
 
 # Place buttons in every other column
 with cols[1]:
