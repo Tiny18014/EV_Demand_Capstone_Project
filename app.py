@@ -745,7 +745,7 @@ if 'input_type' in st.session_state:
             fig_sarimax.add_trace(go.Scatter(x=future_ci.index, y=future_ci.iloc[:, 1], fill='tonexty', mode="lines", line_color="green", opacity=0.2, name="Confidence Interval"))
             fig_sarimax.update_layout(
                 title="Hybrid SARIMAX Quarterly Forecast — GDP as Exogenous Variable",
-                xaxis_title="Date", yaxis_title="EV Registrations",
+                xaxis_title="Year", yaxis_title="EV Registrations",
                 paper_bgcolor="#bef0e5", plot_bgcolor="#bef0e5", font=dict(color="#000000")
             )
             st.plotly_chart(fig_sarimax, use_container_width=True)
