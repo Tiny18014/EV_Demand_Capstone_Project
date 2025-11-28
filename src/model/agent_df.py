@@ -6,7 +6,7 @@ from agno.models.huggingface import HuggingFace
 import os
 import streamlit as st
 
-openaii = st.secrets["DF_AGENT"]
+openaii = st.secrets["AGENT_Y"]
 # --- Agent Definition ---
 ev_forecast_analyst_agent = Agent(
     model=HuggingFace(id="openai/gpt-oss-20b", api_key=openaii, temperature=0.25),

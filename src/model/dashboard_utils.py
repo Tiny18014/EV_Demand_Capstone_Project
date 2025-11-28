@@ -43,7 +43,7 @@ from huggingface_hub import InferenceClient
 from textwrap import dedent
 
 # --- AGENT CONFIGURATION & INITIALIZATION ---
-HF_TOKEN = st.secrets.get("PESTEL_AGENT")
+HF_TOKEN = st.secrets.get("AGENT_X")
 LLM_MODEL_ID = "openai/gpt-oss-20b"
 LLM_CLIENT = None
 
