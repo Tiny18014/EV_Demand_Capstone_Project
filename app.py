@@ -276,6 +276,7 @@ if 'input_type' in st.session_state:
                 elif brand_id == 2:
                     name = "Mahindra"
                     data = msl
+                    y_pred = 1.0
                 elif brand_id == 3:
                     name = "Tata Motors"
                     data = tsl
@@ -289,7 +290,7 @@ if 'input_type' in st.session_state:
                     continue
 
                 last_xi = x_brand.iloc[-1].to_dict()
-                if brand_id != 0:
+                if brand_id != 0 or brand_id != 2:
                     y_pred = model.predict_one(last_xi)
                     print(y_pred)
 
