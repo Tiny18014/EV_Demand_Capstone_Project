@@ -189,7 +189,7 @@ if 'input_type' in st.session_state:
         df["buzz_score"] = df["news_volume"] * df["vader_compound"]
         buzz_scores = df.groupby("brand_encoded")["buzz_score"].sum().reset_index(name="buzz_score")
         corr = df[['vader_compound', 'bert_roll_avg', 'trend_delta', 'news_volume']].corr()
-        fig_momentum = px.line(df, x="index", y="vader_momentum", color="brand_name", markers=True)
+        fig_momentum = px.line(df, x="index", y="vader_momentum", color="brand_name", markers=True, labels={"index": "Time Index", "vader_momentum": "Momentum", "brand_name": "Brand"})
 
     # Bar chart: average sentiment
         fig_bar_sentiment = px.bar(
@@ -200,7 +200,7 @@ if 'input_type' in st.session_state:
             barmode="group",
             labels={
                 "brand_name": "Brand",
-                "avg_sentiment": "Average Sentiment Score",
+                "avg_sentiment": "Sentiment Confidence",
                 "sentiment_type": "Sentiment"
             }
         )
@@ -780,7 +780,8 @@ if 'input_type' in st.session_state:
             fig_energy = px.line(
                 future_energy[[f'{cat}_Energy_MWh' for cat in category_share]].reset_index().melt(id_vars='index', var_name='Category', value_name='Energy_MWh'),
                 x='index', y='Energy_MWh', color='Category',
-                title="Energy Consumption Prediction (2025–2027", markers=True
+                title="Energy Consumption Prediction (2025–2027)", markers=True,
+                labels={"index": "Year", "Energy_MWh": "Energy Demand (MWh)", "Category": "Vehicle Category"}
             )
             fig_energy.update_layout(paper_bgcolor="#bef0e5", plot_bgcolor="#bef0e5", font=dict(color="#000000"))
 
