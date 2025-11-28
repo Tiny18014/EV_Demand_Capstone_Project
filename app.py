@@ -389,14 +389,14 @@ if 'input_type' in st.session_state:
             progress = st.progress(0)
             insights = []
 
-            """for i, (_, row) in enumerate(brand_summary.iterrows()):
+            for i, (_, row) in enumerate(brand_summary.iterrows()):
                 result = tech_to_business_agent.run(str(row.to_dict()))
                 insights.append(result.content)
                 progress.progress((i + 1) / len(brand_summary))
             st.success("Analysis complete ✅ ")
             for insight in insights:
                 with st.expander(insight.split('\n')[0].strip('#').strip(), expanded=False):
-                    st.markdown(insight, unsafe_allow_html=False)"""
+                    st.markdown(insight, unsafe_allow_html=False)
         with c2:
             st.subheader("Model Metrics")
             st.metric(label="Accuracy", value=f"{accuracy.get():.2%}")
@@ -611,14 +611,14 @@ if 'input_type' in st.session_state:
 
         st.subheader("Tech to Business Angle - Sales against the Timeline")
         col3, col4 = st.columns([3,3])
-        """with col3:
+        with col3:
             response_quantum = ev_forecast_analyst_agent.run(f"Quantum Dataframe Analysis for this dataframe: {quantum_json}")
             with st.expander("Quarterly Forecast by the Quantum Model", expanded=False):
                 st.markdown(response_quantum.content, unsafe_allow_html=False)
         with col4:
             response_classical = ev_forecast_analyst_agent.run(f"Classical Dataframe Analysis for this dataframe: {classical_json}")
             with st.expander(f"{days_to_forecast} Day Forecast by the Classical Model", expanded=False):            
-                st.markdown(response_classical.content, unsafe_allow_html=False)"""
+                st.markdown(response_classical.content, unsafe_allow_html=False)
             
     elif st.session_state.input_type == "charge":
         st.header('Charging Behavior and Energy Consumption Analysis')
@@ -823,9 +823,9 @@ if 'input_type' in st.session_state:
             with open("output.json") as f:
                 dataset = json.load(f)
             st.subheader("Tech to Business Angle - Charging Behavior Analysis")
-            """with st.spinner("Analyzing..."):
+            with st.spinner("Analyzing..."):
                 result = charging_intelligence_agent.run(f"Analyze the EV energy consumption dataset for 2025-2027: {json.dumps(dataset)} Provide insights on charging behavior, energy demand trends, and infrastructure implications.")
-            st.markdown(result.content, unsafe_allow_html=False)"""
+            st.markdown(result.content, unsafe_allow_html=False)
             st.write("")
             st.subheader("⚡ EV Energy Demand Calculation Formula")
             st.latex(r"""
@@ -1097,13 +1097,13 @@ if 'input_type' in st.session_state:
             col_left, col_right = st.columns(2)
             from src.model.news import fetch_news_data
             #UNCOMMENT TO RUN AGENT 
-            """news_summary = fetch_news_data()
+            news_summary = fetch_news_data()
             half = len(news_summary) // 2
             with col_left:
                 st.header('On the Headlines')
                 st.markdown(news_summary[:half])
             with col_right:
-                st.markdown("-" + news_summary[half:])"""
+                st.markdown("-" + news_summary[half:])
 
         col_why, col_about = st.columns([2,1], gap="small") 
         with col_why:
