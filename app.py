@@ -17,8 +17,58 @@ from src.model.agent_df import ev_forecast_analyst_agent
 from src.model.pestel_agent import pestel_classifier
 import plotly.express as px
 import plotly.graph_objects as go
+import threading
+import time
+# ==================== 1. LIFECYCLE MANAGER (MUST BE GLOBAL) ====================
+# This line fixes the 'run_simulation is not defined' error
+from src.model.live_simulation import run_simulation
+from src.model.live_dashboard import LiveDashboard
+from src.model.dashboard_utils import (
+    get_2025_data,
+    run_classical_predictions,
+    generate_agent_report,
+    generate_on_demand_forecast,
+    DATA_PATH
+)
+def start_simulation_thread():
+    """Starts the simulation thread and stores it in session state."""
+    if 'sim_stop_event' not in st.session_state:
+        stop_event = threading.Event()
+        st.session_state['sim_stop_event'] = stop_event
+        
+        # Start the thread
+        thread = threading.Thread(target=run_simulation, args=(stop_event,), daemon=True)
+        thread.start()
+        st.session_state['sim_thread'] = thread
+        st.toast("🚀 Simulation booting up...")
 
+def stop_simulation_thread():
+    """Signals the thread to stop and clears session state."""
+    if 'sim_stop_event' in st.session_state:
+        st.session_state['sim_stop_event'].set()
+        
+        # Clean up state immediately so UI updates
+        del st.session_state['sim_stop_event']
+        del st.session_state['sim_thread']
+        st.toast("zzz Server disconnected.")
+# ==================== GLOBAL INITIALIZATION ====================
+# Initialize session state variables BEFORE any UI rendering
+if 'live_refresh_count' not in st.session_state:
+    st.session_state.live_refresh_count = 0
 
+if 'input_type' not in st.session_state:
+    st.session_state.input_type = "home"  # Default to home page
+# ==================== 2. GLOBAL LOGIC CHECK (RUNS ON EVERY RELOAD) ====================
+
+# This check happens BEFORE we decide what page to show
+if st.session_state.get("input_type") == "demand":
+    # User is on the projection page -> Ensure ON
+    if 'sim_thread' not in st.session_state:
+        start_simulation_thread()
+else:
+    # User is on ANY other page -> Ensure OFF
+    if 'sim_thread' in st.session_state:
+        stop_simulation_thread()
 
 st.set_page_config(
     page_title='EVolutionIndia',
@@ -387,17 +437,19 @@ if 'input_type' in st.session_state:
             st.subheader("Tech to Business Angle - Brand Specific Insights")
             st.markdown("<p>Our agent combines model results with sentiment trends for clear business insights.</p>", unsafe_allow_html=True)
             #UNCOMMENT TO RUN AGENT
-            progress = st.progress(0)
-            insights = []
+            # TEMPORARILY DISABLED - API CREDITS EXCEEDED
+            # progress = st.progress(0)
+            # insights = []
+            # for i, (_, row) in enumerate(brand_summary.iterrows()):
+            #     result = tech_to_business_agent.run(str(row.to_dict()))
+            #     insights.append(result.content)
+            #     progress. progress((i + 1) / len(brand_summary))
+            # st.success("Analysis complete ✅ ")
+            # for insight in insights:
+            #     with st. expander(insight.split('\n')[0].strip('#').strip(), expanded=False):
+            #         st.markdown(insight, unsafe_allow_html=False)
 
-            for i, (_, row) in enumerate(brand_summary.iterrows()):
-                result = tech_to_business_agent.run(str(row.to_dict()))
-                insights.append(result.content)
-                progress.progress((i + 1) / len(brand_summary))
-            st.success("Analysis complete ✅ ")
-            for insight in insights:
-                with st.expander(insight.split('\n')[0].strip('#').strip(), expanded=False):
-                    st.markdown(insight, unsafe_allow_html=False)
+            st.info("🔧 AI Agent analysis temporarily disabled.  Focusing on live simulation.")
         with c2:
             st.subheader("Model Metrics")
             st.metric(label="Accuracy", value=f"{accuracy.get():.2%}")
@@ -406,75 +458,185 @@ if 'input_type' in st.session_state:
             st.metric(label="Recall", value=f"{recall.get():.2f}")
 
     elif st.session_state.input_type == "demand":
+
         st.header('Sales Forecasting')
+
         # ==================== AGENT & FORECAST CORE SETUP ====================
+        
+        import streamlit as st
+        from src.model.live_simulation import run_simulation
         from src.model.dashboard_utils import (
+
             get_2025_data,
+
             run_classical_predictions,
+
             generate_agent_report,
+
             generate_on_demand_forecast,
+
             DATA_PATH
+
+              # Import LiveDashboard class for Postgres connection
+
         )
-        from src.model.simulation_analysis import (
-        get_simulation_data, 
-        create_performance_graph, 
-        get_training_performance_summary,
-        calculate_metrics # Added for optional display of simulation metrics
-    )
+        from src.model.live_dashboard import LiveDashboard
 
         df_2025 = get_2025_data()
+
         classical_preds = run_classical_predictions(df_2025)
+
         classical_report = generate_agent_report(classical_preds, "Classical")
 
-
         # Create the side-by-side layout
+
         c1_graph, c2_metrics = st.columns([2, 1])
 
+
+
         # --- Left Column: Simulation Graph ---
+
         with c1_graph:
-            st.markdown("**Simulation Performance Over Time**")
-            st.markdown("This graph shows how the models performed in a day-by-day forecasting simulation, comparing predicted sales to the actual sales generated during the run.")
+            st.markdown("**Live Simulation Performance**")
+            st.markdown("Real-time comparison of predicted vs. actual sales.")
+            
+            # Refresh Logic
+            col_refresh, _ = st.columns([1, 5])
+            with col_refresh:
+                if st.button("🔄 Refresh", key="refresh_live_sim", use_container_width=True):
+                    if 'live_refresh_count' not in st.session_state:
+                        st.session_state.live_refresh_count = 0
+                    st.session_state.live_refresh_count += 1
+                    st.rerun()
+            
+            # Use LiveDashboard class
+            # IMPORTANT: Use @st.cache_resource for the connection class if possible, 
+            # or instantiate efficiently.
+            live_dashboard = LiveDashboard() 
+            predictions_df = live_dashboard.get_live_data()
+            
+            if not predictions_df.empty:
+                # Metrics cards at the top
+                col1, col2, col3, col4 = st.columns(4)
+                with col1: 
+                    st.metric("Total Predictions", len(predictions_df))
+                with col2: 
+                    st.metric("Overall MAE", f"{predictions_df['error'].abs().mean():.2f}" if 'error' in predictions_df. columns else "N/A")
+                with col3: 
+                    st.metric("Avg Latency", f"{predictions_df['processing_time_ms'].mean():.2f}ms" if 'processing_time_ms' in predictions_df.columns else "N/A")
+                with col4: 
+                    st.metric("Confidence", "0.95")
 
-            # IMPORTANT: DB_PATH is set to the confirmed location: src/model/
-            DB_PATH = "src/model/live_predictions.db" 
-            sim_df = get_simulation_data(DB_PATH)
-
-            if not sim_df.empty:
-                fig = create_performance_graph(sim_df)
-                st.plotly_chart(fig, use_container_width=True)
-                
-                # Display overall simulation metrics
-                sim_metrics = calculate_metrics(sim_df)
-                if sim_metrics:
-                    st.markdown(f"**Simulation Metrics:** R²: `{sim_metrics['r2']:.3f}` | MAE: `{sim_metrics['mae']:.2f}` | RMSE: `{sim_metrics['rmse']:.2f}`")
-
-                st.markdown(
-                    "<h6 style='text-align: center; color: #a8872dff;'>Actual vs. Predicted sales during the completed simulation.</h6>", 
-                    unsafe_allow_html=True
+                # Main graph
+                recent = predictions_df.sort_values('timestamp').tail(100)
+                fig_ts = go. Figure()
+                fig_ts. add_trace(go.Scatter(
+                    x=recent['timestamp'], 
+                    y=recent['actual_sales'], 
+                    name='Actual',
+                    mode='lines',
+                    line=dict(color='#48CAE4', width=2)
+                ))
+                fig_ts.add_trace(go.Scatter(
+                    x=recent['timestamp'], 
+                    y=recent['predicted_sales'], 
+                    name='Predicted', 
+                    line=dict(dash='dash', color='#FFD166', width=2)
+                ))
+                fig_ts. update_layout(
+                    title="Real-time Sales: Actual vs Predicted",
+                    height=400,
+                    xaxis_title="Timestamp",
+                    yaxis_title="Sales Quantity",
+                    paper_bgcolor="#bef0e5",
+                    plot_bgcolor="#bef0e5",
+                    font=dict(color="#000000")
                 )
+                # We already initialized it at the top, so this is now safe.
+                # But as a double safety:
+                refresh_key = st.session_state.get('live_refresh_count', 0)
+                st.plotly_chart(fig_ts, use_container_width=True, key=f"live_chart_{refresh_key}")
+                
+                # Display data table
+                st.markdown("### 📋 Recent Predictions")
+                
+                # Format the dataframe for better display
+                display_df = predictions_df.head(10). copy()
+                
+                # Format timestamp if it exists
+                if 'timestamp' in display_df. columns:
+                    display_df['timestamp'] = pd.to_datetime(display_df['timestamp']). dt.strftime('%Y-%m-%d %H:%M:%S')
+                
+                # Select and rename columns for cleaner display
+                columns_to_show = []
+                column_mapping = {
+                    'date': 'Date',
+                    'state': 'State',
+                    'vehicle_category': 'Category',
+                    'actual_sales': 'Actual',
+                    'predicted_sales': 'Predicted',
+                    'error': 'Error',
+                    'model_confidence': 'Confidence',
+                    'processing_time_ms': 'Process Time (ms)'
+                }
+                
+                # Only include columns that exist
+                for old_col, new_col in column_mapping.items():
+                    if old_col in display_df.columns:
+                        columns_to_show.append(old_col)
+                
+                if columns_to_show:
+                    display_df = display_df[columns_to_show]
+                    display_df = display_df.rename(columns=column_mapping)
+                    
+                    # Display with styling
+                    st.dataframe(
+                        display_df,
+                        use_container_width=True,
+                        hide_index=True,
+                        key=f"live_table_{st.session_state.live_refresh_count}"
+                    )
+                
             else:
-                st.warning(f"No simulation data found at `{DB_PATH}`. Please run the simulation pipeline.")
+                st.info("⏳ Waiting for simulation data...")
+                # Auto-rerun to poll for data if empty? 
+                # Be careful not to create an infinite fast loop.
+                time.sleep(2)
+                st.rerun()
 
-        # --- Right Column: Formatted Training Metrics ---
         with c2_metrics:
-            st.markdown("**Model Performance on Test Data**")
-            st.markdown("Metrics from the initial model training, showing performance on the original test set.")
 
-            # This uses the modified get_training_performance_summary()
-            training_summary_df = get_training_performance_summary() 
+            st.markdown("**Model Performance on Test Data**")
+
+            st.markdown("Metrics from the initial model training (Held-out Test Set).")
+            # Load pre-computed accuracy report from CSV
+            report_path = "src/reports/model_accuracy_report.csv"
+            
+            try:
+                training_summary_df = pd.read_csv(report_path)
+                
+                # Rename columns to match the display format
+                training_summary_df = training_summary_df.rename(columns={
+                    'Category': 'Vehicle Category',
+                    'R2_Score': 'R² Score'
+                })
+                
+            except FileNotFoundError:
+                st.warning(f"⚠️ Report file not found at `{report_path}`. Run `python scripts/report_model_accuracy.py` first.")
+                training_summary_df = pd.DataFrame()
+
+
 
             if not training_summary_df.empty:
-                # Build the HTML/Markdown string for the summary box
                 metrics_html = '<b>📊 Training Performance Summary</b><br><br>'
                 for index, row in training_summary_df.iterrows():
                     metrics_html += f"• <b>{row['Vehicle Category']}:</b><br>"
-                    # Use formatted numbers for display
                     r2_score_val = row['R² Score'] if pd.notna(row['R² Score']) else 0.0
                     mae_val = row['MAE'] if pd.notna(row['MAE']) else 0.0
-                    metrics_html += f"  - R² Score: {r2_score_val:.3f}<br>"
-                    metrics_html += f"  - MAE: {mae_val:.2f}<br>"
+                    metrics_html += f"  - R² Score: {r2_score_val:.3f}<br>"
+                    metrics_html += f"  - MAE: {mae_val:.2f}<br>"
                 
-                st.markdown(f"""
+                st. markdown(f"""
                 <div style="
                     background-color:#bef0e5;
                     border: 1px solid #bef0e5;
@@ -487,8 +649,11 @@ if 'input_type' in st.session_state:
                 </div>
                 """, unsafe_allow_html=True)
             else:
-                st.warning("Could not load training performance data. Check the `src/model` directory for model files.")
+                st.warning("Could not load training performance data.")
 
+
+
+        st.divider()
         st.subheader("On-Demand Regional Forecasts")
         col1, col2 = st.columns([3,3])
         with col1:
@@ -610,17 +775,26 @@ if 'input_type' in st.session_state:
             st.plotly_chart(forecast_fig, use_container_width=True)
             classical_json = classical_preds.to_json(orient="records")
 
+
         st.subheader("Tech to Business Angle - Sales against the Timeline")
+
         col3, col4 = st.columns([3,3])
+
         with col3:
-            response_quantum = ev_forecast_analyst_agent.run(f"Quantum Dataframe Analysis for this dataframe: {quantum_json}")
-            with st.expander("Quarterly Forecast by the Quantum Model", expanded=False):
-                st.markdown(response_quantum.content, unsafe_allow_html=False)
+            # TEMPORARILY DISABLED - API CREDITS EXCEEDED
+            # response_quantum = ev_forecast_analyst_agent.run(f"Quantum Dataframe Analysis for this dataframe: {quantum_json}")
+            # with st.expander("Quarterly Forecast by the Quantum Model", expanded=False):
+
+                #     st. markdown(response_quantum.content, unsafe_allow_html=False)
+            st.info("🔧 AI Agent analysis temporarily disabled.  Focusing on live simulation.")
         with col4:
-            response_classical = ev_forecast_analyst_agent.run(f"Classical Dataframe Analysis for this dataframe: {classical_json}")
-            with st.expander(f"{days_to_forecast} Day Forecast by the Classical Model", expanded=False):            
-                st.markdown(response_classical.content, unsafe_allow_html=False)
-            
+
+            # response_classical = ev_forecast_analyst_agent.run(f"Classical Dataframe Analysis for this dataframe: {classical_json}")
+            # with st.expander(f"{days_to_forecast} Day Forecast by the Classical Model", expanded=False):            
+            #     st.markdown(response_classical. content, unsafe_allow_html=False)
+            st.info("🔧 AI Agent analysis temporarily disabled.  Focusing on live simulation.")
+
+
     elif st.session_state.input_type == "charge":
         st.header('Charging Behavior and Energy Consumption Analysis')
         # ==================== LOAD DATA ====================
@@ -824,9 +998,11 @@ if 'input_type' in st.session_state:
             with open("output.json") as f:
                 dataset = json.load(f)
             st.subheader("Tech to Business Angle - Charging Behavior Analysis")
-            with st.spinner("Analyzing..."):
-                result = charging_intelligence_agent.run(f"Analyze the EV energy consumption dataset for 2025-2027: {json.dumps(dataset)} Provide insights on charging behavior, energy demand trends, and infrastructure implications.")
-            st.markdown(result.content, unsafe_allow_html=False)
+            # TEMPORARILY DISABLED - API CREDITS EXCEEDED
+            # with st. spinner("Analyzing..."):
+            #     result = charging_intelligence_agent.run(f"Analyze the EV energy consumption dataset for 2025-2027: {json. dumps(dataset)}")
+            # st.markdown(result.content, unsafe_allow_html=False)
+            st.info("🔧 AI charging analysis temporarily disabled.")
             st.write("")
             st.subheader("⚡ EV Energy Demand Calculation Formula")
             st.latex(r"""
@@ -1097,8 +1273,10 @@ if 'input_type' in st.session_state:
         with news_container:
             col_left, col_right = st.columns(2)
             from src.model.news import fetch_news_data
-            #UNCOMMENT TO RUN AGENT 
-            news_summary = fetch_news_data()
+            # TEMPORARILY DISABLED - API CREDITS EXCEEDED
+            # from src.model. news import fetch_news_data
+            # news_summary = fetch_news_data()
+            news_summary = "AI-powered news analysis temporarily disabled due to API limits. Check back soon for live EV market updates!"
             half = len(news_summary) // 2
             with col_left:
                 st.header('On the Headlines')
