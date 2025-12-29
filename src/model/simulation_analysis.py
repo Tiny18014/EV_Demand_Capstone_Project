@@ -58,57 +58,97 @@ def create_performance_graph(df):
         xaxis_title="Timestamp",
         yaxis_title="EV Sales Quantity",
         legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
-        paper_bgcolor="#bef0e5",
-        plot_bgcolor="#bef0e5",
-        font=dict(color="#0A0A0A")
+        paper_bgcolor="#112235",
+        plot_bgcolor="#1c2a38",
+        font=dict(color="#E0E6ED")
     )
     return fig
 
 def get_training_performance_summary():
     """
-    Finds all category-specific models, loads their saved test scores,
-    and returns a summary DataFrame.
+    Returns the training performance summary.
+    Prioritizes loading the 'final_model_accuracy_report.csv' if available,
+    as it contains the scientifically verified metrics.
+    Falls back to inspecting pickle files if the report is missing.
     """
-    ROOT_DIR = Path(__file__).parent.resolve()  # Resolves to src/model/
-    MODELS_DIR = ROOT_DIR
+    # 1. Try loading the CSV report first (Most Accurate)
+    # Adjust path to where report_model_accuracy.py saves it
+    # Assuming this script runs from src/model/, we go up to project root then output/
+    CSV_PATH = Path(__file__).parent.parent.parent.resolve() / "output" / "final_model_accuracy_report.csv"
     
-    model_files = list(MODELS_DIR.glob("advanced_model_*.pkl"))
+    if CSV_PATH.exists():
+        try:
+            df = pd.read_csv(CSV_PATH)
+            # Map CSV columns to Dashboard columns
+            # CSV: Category, Model_Type, Test_Records, MAE, RMSE, R2_Score
+            # Dashboard Expects: "Vehicle Category", "MAE", "R² Score"
+            
+            summary = df.rename(columns={
+                'Category': 'Vehicle Category',
+                'R2_Score': 'R² Score'
+            })
+            return summary[['Vehicle Category', 'MAE', 'R² Score']].sort_values('R² Score', ascending=False)
+        except Exception:
+            pass # Fallback to old logic if CSV read fails
 
-    if not model_files:
-        return pd.DataFrame() # Return empty dataframe if no models found
+    # 2. Fallback: Look for .pkl files (Old Logic + Specialized Support)
+    ROOT_DIR = Path(__file__).parent.resolve()
+    
+    # Find standard models
+    standard_models = list(ROOT_DIR.glob("advanced_model_*.pkl"))
+    # Find specialized models
+    specialized_models = list(ROOT_DIR.glob("specialized_*_model.pkl"))
+    
+    all_models = standard_models + specialized_models
+
+    if not all_models:
+        return pd.DataFrame()
 
     performance_data = []
 
-    for model_path in model_files:
+    for model_path in all_models:
         try:
-            category_name = model_path.stem.replace("advanced_model_", "").replace("_", " ")
+            # Determine Category Name
+            name = model_path.stem
+            if "specialized" in name:
+                # format: specialized_bus_monthly_model
+                category_name = name.split("_")[1].capitalize() # e.g., 'Bus'
+                if category_name == '3w': category_name = '3-Wheelers'
+            else:
+                # format: advanced_model_2-Wheelers
+                category_name = name.replace("advanced_model_", "").replace("_", " ")
 
-            # Add a check to skip the 'Unknown' category
-            if category_name.lower() == 'unknown':
-                continue
+            if category_name.lower() == 'unknown': continue
 
+            # Load metrics
+            # Note: Specialized models might not have 'test_scores' dict inside if they are just the model object.
+            # This fallback loop is brittle for specialized models unless they were saved with metadata.
+            # The CSV method above is much safer.
+            
             with open(model_path, 'rb') as f:
                 model_data = pickle.load(f)
             
-            # Navigate the nested dictionary to get the scores
-            scores = model_data.get('test_scores', {}).get('optimized', {})
-            mae = scores.get('MAE')
-            r2 = scores.get('R2')
-
-            if mae is not None and r2 is not None:
-                performance_data.append({
-                    "Vehicle Category": category_name,
-                    "MAE": mae,
-                    "R² Score": r2
-                })
+            # Handle Dictionary format (Standard Models)
+            if isinstance(model_data, dict) and 'test_scores' in model_data:
+                scores = model_data['test_scores'].get('optimized', {})
+                mae = scores.get('MAE')
+                r2 = scores.get('R2')
+                
+                if mae is not None:
+                    performance_data.append({
+                        "Vehicle Category": category_name,
+                        "MAE": mae,
+                        "R² Score": r2 if r2 else 0.0
+                    })
+            
+            # Handle Specialized Models (If they don't have metadata, we skip or mock)
+            # Since we generated a CSV report, we rely on that primarily.
+            
         except Exception:
-            # Silently ignore models that can't be read or don't have scores
             continue
 
     if not performance_data:
         return pd.DataFrame()
 
     performance_df = pd.DataFrame(performance_data)
-    performance_df = performance_df.sort_values(by="R² Score", ascending=False).reset_index(drop=True)
-    
-    return performance_df
+    return performance_df.sort_values(by="R² Score", ascending=False).reset_index(drop=True)
